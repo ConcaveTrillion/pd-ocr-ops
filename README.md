@@ -10,7 +10,8 @@ FastAPI server. It provides:
   can discover and spawn siblings.
 - **Shared UI prefs** (`ui-prefs.json`): cross-app theme, density, accent color,
   layer colors, and per-app extension blobs.
-- **Sibling launcher**: spawn sibling apps by binary, poll `/healthz`, surface the URL.
+- **Sibling launcher**: spawn sibling apps by binary, poll `/healthz`, surface
+  the URL.
 - **Auth and storage adapters**: local-mode stubs; Phase 4 adds cloud backends.
 - **GPU dispatch adapters**: `StageDispatcher` for short page-level calls,
   `LongJobRunner` (SQLite-backed) for training runs and batch jobs.
@@ -38,4 +39,5 @@ See `pd_ocr_ops/schemas/emit.py::PUBLIC_MODELS` for the registration surface.
 Full spec: `docs/superpowers/specs/2026-05-16-cross-cut-design.md` in the workspace.
 
 Plan #7 (upcoming): migrate `pd-prep-for-pgdp`'s `STAGE_IMPL` registry and Modal
-adapters into `pd-ocr-ops` (`LocalStageDispatcher`'s registry is empty in Phase 1).
+adapters into `pd-ocr-ops` (`LocalStageDispatcher`'s registry is empty in
+Phase 1).

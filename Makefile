@@ -12,7 +12,7 @@ $(_goals):
 
 else
 
-.PHONY: setup lint format test ci build clean
+.PHONY: setup lint format test ci build clean pre-commit-check
 
 setup: ## Install dependencies
 	uv sync --group dev
@@ -25,6 +25,9 @@ format: ## Format code
 
 test: ## Run tests with parallelization
 	uv run pytest -n auto
+
+pre-commit-check: ## Run all pre-commit hooks against all files (read-only check)
+	uv run pre-commit run --all-files
 
 ci: lint test ## Run full CI pipeline
 
