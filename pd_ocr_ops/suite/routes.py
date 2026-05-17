@@ -17,12 +17,12 @@ def mount_routes(app: FastAPI, adapters: SuiteAdapters | None = None) -> None:
     router = APIRouter(prefix="/api/suite", tags=["suite"])
 
     @router.get("/installed")
-    async def get_installed() -> list[dict]:
+    async def get_installed() -> list[dict[str, object]]:
         apps = adapters.registry.list_installed()
         return [a.model_dump(mode="json") for a in apps]
 
     @router.post("/launch")
-    async def launch_app(app_id: str) -> dict:
+    async def launch_app(app_id: str) -> dict[str, object]:
         installed_apps = adapters.registry.list_installed()
         found = next((a for a in installed_apps if a.app_id == app_id), None)
         if found is None:
@@ -33,7 +33,7 @@ def mount_routes(app: FastAPI, adapters: SuiteAdapters | None = None) -> None:
         return result.model_dump(mode="json")
 
     @router.get("/prefs")
-    async def get_prefs() -> dict:
+    async def get_prefs() -> dict[str, object]:
         prefs = adapters.prefs.read()
         return prefs.model_dump(mode="json")
 

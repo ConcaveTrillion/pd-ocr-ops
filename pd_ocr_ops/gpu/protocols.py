@@ -28,7 +28,7 @@ class StageDispatcher(Protocol):
 class LongJobRunner(Protocol):
     """Long-running job management (training runs, batch synth, etc.)."""
 
-    async def submit(self, kind: str, spec: dict) -> str:
+    async def submit(self, kind: str, spec: dict[str, object]) -> str:
         """Submit a new job; returns the job_id."""
         ...
 

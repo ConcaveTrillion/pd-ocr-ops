@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import warnings
 from pathlib import Path
-from typing import runtime_checkable
+from typing import Any, runtime_checkable
 
 import filelock
 from typing_extensions import Protocol
@@ -25,7 +25,7 @@ class PrefsAdapter(Protocol):
         """Persist the common section; preserve per-app sections."""
         ...
 
-    def write_app(self, app_id: str, payload: dict) -> None:
+    def write_app(self, app_id: str, payload: dict[str, Any]) -> None:
         """Persist the per-app blob for app_id; preserve other sections."""
         ...
 
@@ -41,7 +41,7 @@ class LocalFilePrefs:
         self._path = Path(root)
         self._lock_path = self._path.with_suffix(".json.lock")
 
-    def _read_raw(self) -> dict:
+    def _read_raw(self) -> dict[str, Any]:
         if not self._path.exists():
             return {}
         try:
@@ -49,7 +49,7 @@ class LocalFilePrefs:
         except Exception:
             return {}
 
-    def _write_raw(self, data: dict) -> None:
+    def _write_raw(self, data: dict[str, Any]) -> None:
         self._path.parent.mkdir(parents=True, exist_ok=True)
         self._path.write_text(json.dumps(data, indent=2, default=str))
 
@@ -83,7 +83,7 @@ class LocalFilePrefs:
             data["common"] = json.loads(common.model_dump_json())
             self._write_raw(data)
 
-    def write_app(self, app_id: str, payload: dict) -> None:
+    def write_app(self, app_id: str, payload: dict[str, Any]) -> None:
         """Update only the per-app section for app_id, preserving everything else."""
         with filelock.FileLock(str(self._lock_path)):
             data = self._read_raw()

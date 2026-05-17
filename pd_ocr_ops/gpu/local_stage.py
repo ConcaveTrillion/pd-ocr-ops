@@ -29,10 +29,13 @@ class LocalStageDispatcher:
     Impl signature: async def impl(page_id: str, device: str, **kwargs) -> dict
     """
 
-    def __init__(self, registry: dict[tuple[str, str], Callable] | None = None) -> None:
-        self._registry: dict[tuple[str, str], Callable] = dict(registry or {})
+    def __init__(
+        self,
+        registry: dict[tuple[str, str], Callable[..., Any]] | None = None,
+    ) -> None:
+        self._registry: dict[tuple[str, str], Callable[..., Any]] = dict(registry or {})
 
-    def register_stage(self, stage_id: str, device: str, impl: Callable) -> None:
+    def register_stage(self, stage_id: str, device: str, impl: Callable[..., Any]) -> None:
         """Register a stage implementation. Warns if replacing an existing entry."""
         if device not in _VALID_DEVICES:
             raise ValueError(f"device {device!r} is not valid. Allowed: {sorted(_VALID_DEVICES)}")

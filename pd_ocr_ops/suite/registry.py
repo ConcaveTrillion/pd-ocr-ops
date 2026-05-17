@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import runtime_checkable
+from typing import Any, runtime_checkable
 
 import filelock
 import tomli
@@ -41,7 +41,7 @@ class LocalTomlSuiteRegistry:
         self._path = Path(root)
         self._lock_path = self._path.with_suffix(".toml.lock")
 
-    def _read_raw(self) -> dict:
+    def _read_raw(self) -> dict[str, Any]:
         """Read the raw TOML data; return empty dict if file doesn't exist."""
         if not self._path.exists():
             return {"apps": {}}
@@ -54,7 +54,7 @@ class LocalTomlSuiteRegistry:
         except Exception:
             return {"apps": {}}
 
-    def _write_raw(self, data: dict) -> None:
+    def _write_raw(self, data: dict[str, Any]) -> None:
         """Write raw TOML data to disk."""
         self._path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._path, "wb") as f:

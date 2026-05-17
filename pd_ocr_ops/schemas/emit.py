@@ -38,9 +38,9 @@ PUBLIC_MODELS = (
 )
 
 
-def emit_schemas() -> dict:
+def emit_schemas() -> dict[str, dict[str, object]]:
     """Emit all schemas as a dict keyed by model class name."""
-    schemas: dict[str, dict] = {}
+    schemas: dict[str, dict[str, object]] = {}
 
     for model_cls in PUBLIC_MODELS:
         adapter = TypeAdapter(model_cls)

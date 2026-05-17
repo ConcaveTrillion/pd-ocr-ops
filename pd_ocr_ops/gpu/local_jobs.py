@@ -76,7 +76,7 @@ class LocalLongJobRunner:
         self._db_path = Path(db_path)
         self._lock_path = self._db_path.with_suffix(".db.lock")
         self._poll_interval_s = poll_interval_s
-        self._processes: dict[str, subprocess.Popen] = {}
+        self._processes: dict[str, subprocess.Popen[bytes]] = {}
         init_jobs_db(self._db_path)
 
     def _now_iso(self) -> str:
@@ -87,7 +87,7 @@ class LocalLongJobRunner:
         conn.execute("PRAGMA foreign_keys = ON")
         return conn
 
-    async def submit(self, kind: str, spec: dict) -> str:
+    async def submit(self, kind: str, spec: dict[str, object]) -> str:
         """Submit a new job; returns the job_id. State: queued."""
         job_id = str(uuid.uuid4())
         with filelock.FileLock(str(self._lock_path)):
@@ -101,7 +101,7 @@ class LocalLongJobRunner:
             conn.close()
         return job_id
 
-    async def submit_with_process(self, kind: str, spec: dict, cmd: list[str]) -> str:
+    async def submit_with_process(self, kind: str, spec: dict[str, object], cmd: list[str]) -> str:
         """Submit a job and launch a real subprocess; supervise it."""
         job_id = await self.submit(kind, spec)
         proc = subprocess.Popen(
@@ -115,7 +115,7 @@ class LocalLongJobRunner:
         asyncio.create_task(self._supervise(job_id, proc))
         return job_id
 
-    async def _supervise(self, job_id: str, proc: subprocess.Popen) -> None:
+    async def _supervise(self, job_id: str, proc: subprocess.Popen[bytes]) -> None:
         """Wait for process to exit and update DB state."""
         loop = asyncio.get_event_loop()
         try:
@@ -215,7 +215,7 @@ class LocalLongJobRunner:
             conn.commit()
             conn.close()
 
-    def _append_event(self, job_id: str, kind: str, payload: dict) -> None:
+    def _append_event(self, job_id: str, kind: str, payload: dict[str, object]) -> None:
         """Append an event to the job_events table."""
         now = self._now_iso()
         with filelock.FileLock(str(self._lock_path)):
