@@ -16,6 +16,7 @@ dependencies = [
     "fastapi>=0.110",
     "filelock>=3.13",
     "httpx>=0.27",
+    "pd-book-tools",
     "platformdirs>=4.2",
     "pydantic>=2.5",
     "tomli>=2.0",
@@ -34,6 +35,7 @@ Source = "https://github.com/ConcaveTrillion/pd-ocr-ops"
 packages = ["pd_ocr_ops"]
 
 [tool.uv.sources]
+pd-book-tools = { path = "../pd-book-tools", editable = true }
 
 [dependency-groups]
 dev = [
