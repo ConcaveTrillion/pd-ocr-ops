@@ -68,6 +68,7 @@ class LocalFilePrefs:
             "density",
             "accent",
             "font_size_base",
+            "font_scale",
             "layer_colors",
         }
         unknown_keys = set(common_raw.keys()) - known_common_keys

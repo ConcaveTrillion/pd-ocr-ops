@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import re
 from datetime import UTC, datetime
-from typing import Any
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class SuiteApp(BaseModel):
@@ -87,6 +87,7 @@ class CommonUIPrefs(BaseModel):
     density: str = "normal"
     accent: str = "#d6925a"
     font_size_base: int = 12
+    font_scale: Annotated[float, Field(ge=0.8, le=1.4)] = 1.0
     layer_colors: LayerColors = None  # pyright: ignore[reportAssignmentType]  # Pydantic deferred default via model_post_init
 
     def model_post_init(self, __context: Any) -> None:

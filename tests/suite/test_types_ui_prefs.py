@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from pd_ocr_ops.suite.types import UIPrefs
+from pd_ocr_ops.suite.types import CommonUIPrefs, UIPrefs
 
 
 def test_ui_prefs_defaults_match_spec():
@@ -28,3 +28,26 @@ def test_ui_prefs_apps_freeform_dict():
     data = prefs.model_dump(mode="json")
     roundtripped = UIPrefs.model_validate(data)
     assert roundtripped.apps == apps_data
+
+
+def test_common_ui_prefs_font_scale_default():
+    prefs = CommonUIPrefs()
+    assert prefs.font_scale == 1.0
+
+
+def test_common_ui_prefs_font_scale_roundtrip():
+    prefs = CommonUIPrefs(font_scale=1.2)
+    data = prefs.model_dump(mode="json")
+    assert data["font_scale"] == pytest.approx(1.2)
+    roundtripped = CommonUIPrefs.model_validate(data)
+    assert roundtripped.font_scale == pytest.approx(1.2)
+
+
+def test_common_ui_prefs_font_scale_too_low():
+    with pytest.raises(ValidationError):
+        CommonUIPrefs(font_scale=0.7)
+
+
+def test_common_ui_prefs_font_scale_too_high():
+    with pytest.raises(ValidationError):
+        CommonUIPrefs(font_scale=1.5)
