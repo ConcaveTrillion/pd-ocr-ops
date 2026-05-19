@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pd-ocr-ops"
-version = "0.2.0"
+version = "0.2.1"
 description = "Suite plumbing and GPU dispatch adapters for the pd-* OCR suite"
 authors = [
     { name = "CT", email = "concavetrillion@gmail.com" }
@@ -38,7 +38,7 @@ Source = "https://github.com/ConcaveTrillion/pd-ocr-ops"
 packages = ["pd_ocr_ops"]
 
 [tool.uv.sources]
-pd-book-tools = { path = "../pd-book-tools", editable = true }
+pd-book-tools = { git = "https://github.com/ConcaveTrillion/pd-book-tools.git", rev = "cc783c5c8fd92773092cb5c0fe05728574ec256b" }
 
 [dependency-groups]
 dev = [

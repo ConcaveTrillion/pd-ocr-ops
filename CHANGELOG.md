@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] - 2026-05-19
+
+### Fixed
+
+- Replace workspace-local `path = "../pd-book-tools"` source override with a git-rev
+  reference. uv applies `[tool.uv.sources]` transitively when resolving dependencies
+  of a git-pinned package; the relative path anchor constructed an invalid URL
+  (`git+https://…pd-ocr-ops.git@v0.2.0#subdirectory=../pd-book-tools`) and failed.
+
 ## [0.2.0] - 2026-05-19
 
 ### Added
