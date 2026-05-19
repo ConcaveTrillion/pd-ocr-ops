@@ -36,7 +36,7 @@ See `pd_ocr_ops/schemas/emit.py::PUBLIC_MODELS` for the registration surface.
 
 ## Design
 
-Full spec: `docs/superpowers/specs/2026-05-16-cross-cut-design.md` in the workspace.
+Full spec: `docs/specs/2026-05-16-cross-cut-design.md` in the workspace.
 
 Plan #7 (upcoming): migrate `pd-prep-for-pgdp`'s `STAGE_IMPL` registry and Modal
 adapters into `pd-ocr-ops` (`LocalStageDispatcher`'s registry is empty in
