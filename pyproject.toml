@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pd-ocr-ops"
-version = "0.1.0"
+version = "0.2.0"
 description = "Suite plumbing and GPU dispatch adapters for the pd-* OCR suite"
 authors = [
     { name = "CT", email = "concavetrillion@gmail.com" }
