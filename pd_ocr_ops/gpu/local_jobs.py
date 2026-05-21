@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import sqlite3
 import subprocess
 import uuid
@@ -13,12 +14,15 @@ from typing import TYPE_CHECKING
 
 import filelock
 
+from pd_ocr_ops.gpu.events import is_event_line, parse_event_line
 from pd_ocr_ops.gpu.types import JobEvent, JobStatus
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
 _TERMINAL_STATES = frozenset({"succeeded", "failed", "cancelled"})
+
+_log = logging.getLogger(__name__)
 
 
 class UnknownJobError(KeyError):
@@ -115,10 +119,35 @@ class LocalLongJobRunner:
         asyncio.create_task(self._supervise(job_id, proc))
         return job_id
 
+    def _drain_stdout(self, job_id: str, proc: subprocess.Popen[bytes]) -> None:
+        """Read worker stdout line by line, routing @@PDEVENT@@ lines to events.
+
+        Runs in an executor thread. Lines carrying the @@PDEVENT@@ protocol
+        become typed JobEvents; everything else is captured as a log event.
+        Malformed event lines are logged and skipped so a bad line can never
+        crash the supervisor.
+        """
+        if proc.stdout is None:
+            return
+        for raw in proc.stdout:
+            line = raw.decode(errors="replace").rstrip("\n")
+            if not line:
+                continue
+            if is_event_line(line):
+                try:
+                    kind, payload = parse_event_line(line)
+                except ValueError as exc:
+                    _log.warning("skipping malformed @@PDEVENT@@ line: %s", exc)
+                    continue
+                self._append_event(job_id, kind, payload)
+            else:
+                self._append_event(job_id, "log", {"line": line})
+
     async def _supervise(self, job_id: str, proc: subprocess.Popen[bytes]) -> None:
-        """Wait for process to exit and update DB state."""
+        """Drain worker stdout into events, wait for exit, and set terminal state."""
         loop = asyncio.get_event_loop()
         try:
+            await loop.run_in_executor(None, self._drain_stdout, job_id, proc)
             returncode = await loop.run_in_executor(None, proc.wait)
             if returncode == 0:
                 self._set_state(job_id, "succeeded", progress=1.0)
