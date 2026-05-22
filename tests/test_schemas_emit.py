@@ -1,6 +1,13 @@
 import json
 import subprocess
 import sys
+from pathlib import Path
+
+# Locate the repo root from this test file so the schemas-emit subprocess
+# runs from the correct cwd in any checkout. Previously hardcoded to
+# /workspaces/ocr-container/pd-ocr-ops, which only existed in the local
+# dev container and failed everywhere else (including CI).
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _emit() -> dict:
@@ -8,7 +15,7 @@ def _emit() -> dict:
         [sys.executable, "-m", "pd_ocr_ops.schemas"],
         capture_output=True,
         text=True,
-        cwd="/workspaces/ocr-container/pd-ocr-ops",
+        cwd=str(_REPO_ROOT),
     )
     assert result.returncode == 0, f"schemas emit failed:\n{result.stderr}"
     return json.loads(result.stdout)
