@@ -126,7 +126,7 @@ async def test_run_batch_sends_list_of_dicts(
 ) -> None:
     from pd_ocr_ops.gpu.modal_dispatcher import ModalStageDispatcher
 
-    def echo(payload: list[dict]) -> list[dict]:  # type: ignore[type-arg]
+    def echo(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return [
             {
                 "job_type": item["job_type"],

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+import importlib.util
 import json
 import sys
 import types
@@ -38,8 +39,8 @@ def _make_fake_pkg(
     # Register the package in sys.modules
     mod = types.ModuleType(pkg_name)
     mod.__package__ = pkg_name
-    mod.__path__ = [str(pkg_dir)]  # type: ignore[assignment]
-    mod.__spec__ = importlib.util.spec_from_file_location(  # type: ignore[assignment]
+    mod.__path__ = [str(pkg_dir)]
+    mod.__spec__ = importlib.util.spec_from_file_location(
         pkg_name,
         str(pkg_dir / "__init__.py"),
         submodule_search_locations=[str(pkg_dir)],
@@ -189,8 +190,8 @@ def test_register_self_missing_fragment_raises_clear_error(tmp_path, monkeypatch
 
     mod = types.ModuleType(pkg_name)
     mod.__package__ = pkg_name
-    mod.__path__ = [str(pkg_dir)]  # type: ignore[assignment]
-    mod.__spec__ = importlib.util.spec_from_file_location(  # type: ignore[assignment]
+    mod.__path__ = [str(pkg_dir)]
+    mod.__spec__ = importlib.util.spec_from_file_location(
         pkg_name,
         str(pkg_dir / "__init__.py"),
         submodule_search_locations=[str(pkg_dir)],

@@ -39,6 +39,7 @@ def parse_event_line(line: str) -> tuple[str, dict[str, object]]:
         raise ValueError(f"malformed @@PDEVENT@@ payload: {body!r}") from exc
 
     if not isinstance(parsed, dict):
+        # TRY004: all malformed-payload cases uniformly raise ValueError by contract.
         raise ValueError(f"@@PDEVENT@@ payload is not an object: {body!r}")  # noqa: TRY004
 
     kind = parsed.get("kind")
@@ -47,6 +48,7 @@ def parse_event_line(line: str) -> tuple[str, dict[str, object]]:
 
     payload = parsed.get("payload", {})
     if not isinstance(payload, dict):
+        # TRY004: all malformed-payload cases uniformly raise ValueError by contract.
         raise ValueError(  # noqa: TRY004
             f"@@PDEVENT@@ payload field is not an object: {payload!r}"
         )

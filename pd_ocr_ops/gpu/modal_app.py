@@ -11,17 +11,19 @@ if TYPE_CHECKING:
     from types import ModuleType
 
 try:
-    import modal  # pyright: ignore[reportMissingImports]
+    import modal  # pyright: ignore[reportMissingImports]  # optional [modal] extra, no stubs
 
     _modal_available: bool = True
 except ImportError:
-    modal: ModuleType | None = None  # type: ignore[assignment]
+    modal: ModuleType | None = None
     _modal_available = False
 
 # Public flag for test introspection.
 _MODAL_AVAILABLE: bool = _modal_available
 
 if _modal_available and modal is not None:
+    # modal ships no type stubs — every modal.* call below is Unknown-typed
+    # and decorators are untyped. Suppressions are pyright-native and scoped.
     image = (
         modal.Image.debian_slim(python_version="3.13")  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
         .apt_install("libgl1", "libglib2.0-0")

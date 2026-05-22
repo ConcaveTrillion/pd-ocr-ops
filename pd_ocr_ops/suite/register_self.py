@@ -70,7 +70,7 @@ def register_self(
         # files() returns a Traversable; read_text() raises FileNotFoundError
         # when the resource doesn't exist, but the error message may not
         # mention the package name — we wrap it.
-        raw = fragment_file.read_text(encoding="utf-8")  # type: ignore[attr-defined]
+        raw = fragment_file.read_text(encoding="utf-8")
     except (FileNotFoundError, TypeError, ModuleNotFoundError) as exc:
         raise FileNotFoundError(
             f"pd-suite.json not found in package {caller_pkg!r}. "

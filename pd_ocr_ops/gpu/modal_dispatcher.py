@@ -60,13 +60,16 @@ class ModalStageDispatcher(GPUBackend):
         if cached is not None:
             return cached
         try:
+            # optional [modal] extra; basedpyright flags the module on the `from` line
             from modal import Function  # pyright: ignore[reportMissingImports]
         except ImportError as e:
             raise RuntimeError(
                 "Modal backend requires the [modal] extra: install with"
                 " 'pip install pd-ocr-ops[modal]'"
             ) from e
-        fn = Function.lookup(self._app_name, fn_name)
+        # modal stubs omit Function.lookup (valid at runtime); only surfaces
+        # when the [modal] extra is installed.
+        fn = Function.lookup(self._app_name, fn_name)  # pyright: ignore[reportAttributeAccessIssue]
         self._fns[fn_name] = fn
         return fn
 
