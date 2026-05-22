@@ -99,8 +99,8 @@ def _make_doctr_sync(*, image_path: str, page_id: str) -> Any:
     """Return a zero-arg callable that runs DocTR OCR synchronously."""
 
     def _run() -> dict[str, Any]:
-        from pd_book_tools.ocr.document import (
-            Document,  # pyright: ignore[reportMissingTypeStubs]  # no py.typed
+        from pd_book_tools.ocr.document import (  # pyright: ignore[reportMissingTypeStubs]  # pd-book-tools ships no py.typed
+            Document,
         )
 
         doc = Document.from_image_ocr_via_doctr(
@@ -131,7 +131,7 @@ def _make_tesseract_sync(*, image_path: str, page_id: str, language: str) -> Any
                 "Install the [tesseract] extra to use the Tesseract engine."
             )
 
-        image = cv2.imread(image_path)  # pyright: ignore[reportAttributeAccessIssue]  # cv2 stubs incomplete
+        image = cv2.imread(image_path)
         if image is None:
             raise ValueError(f"Could not load image from path: {image_path!r}")
         page = tesseract_ocr_cv2_image(

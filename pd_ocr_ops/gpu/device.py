@@ -24,7 +24,7 @@ def _mps_available() -> bool:
     try:
         import torch  # pyright: ignore[reportMissingImports]  # optional GPU dep; installed via [gpu] extra
 
-        return torch.backends.mps.is_available()  # pyright: ignore[reportAttributeAccessIssue]  # torch stubs incomplete
+        return torch.backends.mps.is_available()
     except Exception:
         return False
 

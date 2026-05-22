@@ -60,7 +60,7 @@ async def test_tesseract_stage_raises_when_unavailable(monkeypatch: pytest.Monke
     """Calling the 'ocr'/'cpu' stage with engine='tesseract' raises ImportError when pytesseract absent."""
     monkeypatch.setenv("PD_GPU_BACKEND", "cpu")
 
-    import pd_book_tools.ocr.cv2_tesseract as _tess_mod
+    import pd_book_tools.ocr.cv2_tesseract as _tess_mod  # pyright: ignore[reportMissingTypeStubs]  # pd-book-tools ships no py.typed
 
     with patch.object(_tess_mod, "_pytesseract_available", False):
         dispatcher = LocalStageDispatcher()
