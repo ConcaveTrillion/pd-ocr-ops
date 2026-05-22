@@ -106,14 +106,6 @@
                 }
             },
             {
-                "code": "reportMissingTypeStubs",
-                "range": {
-                    "startColumn": 13,
-                    "endColumn": 39,
-                    "lineCount": 1
-                }
-            },
-            {
                 "code": "reportUnknownMemberType",
                 "range": {
                     "startColumn": 14,
@@ -158,14 +150,6 @@
                 "range": {
                     "startColumn": 15,
                     "endColumn": 18,
-                    "lineCount": 1
-                }
-            },
-            {
-                "code": "reportMissingTypeStubs",
-                "range": {
-                    "startColumn": 13,
-                    "endColumn": 44,
                     "lineCount": 1
                 }
             },
