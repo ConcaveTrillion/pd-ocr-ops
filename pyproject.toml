@@ -186,10 +186,9 @@ exclude = ["**/__pycache__", "**/.venv", "**/node_modules"]
 # Catches unannotated functions, inferred-Any propagation, untyped decorators,
 # and missing return types that "standard" mode skips.
 typeCheckingMode = "recommended"
-# NOTE: failOnWarnings deferred — recommended mode surfaces warnings from
-# optional GPU dep stubs (cupy/torch) that lag runtime. Enable incrementally
-# as stub coverage improves.
-# failOnWarnings = true
+# Warnings are baselined via .basedpyright/baseline.json — new warnings will
+# fail CI; existing ones are frozen until fixed incrementally.
+failOnWarnings = true
 
 # Import cycles are structural and resolved via TYPE_CHECKING guards.
 # Actual import order issues surface as runtime ImportErrors.
