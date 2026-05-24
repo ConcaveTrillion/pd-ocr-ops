@@ -29,7 +29,8 @@ define _require_peer_book_tools
 endef
 
 .PHONY: help setup lint lint-check format format-check typecheck test ci build clean pre-commit-check dev-local \
-        upgrade-deps release-patch release-minor release-major _do-release
+        upgrade-deps release-patch release-minor release-major _do-release \
+        local-setup local-dev local-check local-upgrade-deps
 
 help: ## Show this help message
 	@echo "Available commands:"
@@ -89,6 +90,22 @@ upgrade-deps: ## Upgrade dependencies and sync local environment
 	@echo "Syncing upgraded dependencies..."
 	uv sync --group dev
 	@echo "Dependencies upgraded and environment synced."
+
+# ---------------------------------------------------------------------------
+# Local-dev mode (sibling editable installs)
+# ---------------------------------------------------------------------------
+
+local-setup: ## Clone any missing sibling pd-* repos into the workspace
+	@./scripts/local-setup.sh
+
+local-dev: ## Switch to local-dev mode (siblings editable + marker)
+	@./scripts/local-dev.sh
+
+local-check: ## Print local-dev mode status + per-sibling resolution
+	@./scripts/local-check.sh
+
+local-upgrade-deps: ## Upgrade deps then restore editable siblings (local-mode only)
+	@./scripts/local-upgrade-deps.sh
 
 # ---------------------------------------------------------------------------
 # Releases
