@@ -28,7 +28,12 @@ define _require_peer_book_tools
 	fi
 endef
 
-.PHONY: setup lint lint-check format typecheck test ci build clean pre-commit-check dev-local
+.PHONY: help setup lint lint-check format format-check typecheck test ci build clean pre-commit-check dev-local \
+        upgrade-deps release-patch release-minor release-major _do-release
+
+help: ## Show this help message
+	@echo "Available commands:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'
 
 setup: ## Install dependencies (idempotent)
 	uv sync --group dev
@@ -41,6 +46,8 @@ lint: ## Run linting (auto-fix)
 lint-check: ## Read-only ruff format+check (no auto-fix; matches CI exactly)
 	uv run ruff format --check .
 	uv run ruff check .
+
+format-check: lint-check ## Alias for lint-check (canonical name for read-only format+lint check)
 
 format: ## Format code
 	uv run ruff format pd_ocr_ops tests
@@ -75,5 +82,33 @@ dev-local: ## [local-dev] Install pd-book-tools from ../pd-book-tools as editabl
 
 clean: ## Clean cache and temporary files
 	rm -rf dist .venv .pytest_cache .ruff_cache .ci-ai.log htmlcov
+
+upgrade-deps: ## Upgrade dependencies and sync local environment
+	@echo "Upgrading dependency lockfile..."
+	uv lock --upgrade
+	@echo "Syncing upgraded dependencies..."
+	uv sync --group dev
+	@echo "Dependencies upgraded and environment synced."
+
+# ---------------------------------------------------------------------------
+# Releases
+# ---------------------------------------------------------------------------
+
+release-patch: ## Release: bump patch, run ci, tag, push (e.g. v0.1.0 → v0.1.1)
+	@$(MAKE) --no-print-directory _do-release BUMP=patch
+
+release-minor: ## Release: bump minor, run ci, tag, push (e.g. v0.1.0 → v0.2.0)
+	@$(MAKE) --no-print-directory _do-release BUMP=minor
+
+release-major: ## Release: bump major, run ci, tag, push (e.g. v0.1.0 → v1.0.0)
+	@$(MAKE) --no-print-directory _do-release BUMP=major
+
+# scripts/do-release.sh handles repo-state guards, runs the ci pre-flight,
+# creates a three-component tag, pushes main + tag, and triggers the
+# GitHub release workflow via `gh workflow run`.
+# Pass FORCE=1 to skip the repo-state guards (pre-flight still runs).
+# Pass SKIP_PUSH=1 to create the tag locally without pushing (dry-run).
+_do-release:
+	@BUMP=$(or $(BUMP),minor) ./scripts/do-release.sh
 
 endif
