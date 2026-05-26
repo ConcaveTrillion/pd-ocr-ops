@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "pdomain-ocr-ops"
-version = "0.2.3"
+dynamic = ["version"]
 description = "Suite plumbing and GPU dispatch adapters for the pd-* OCR suite"
 authors = [
     { name = "CT", email = "concavetrillion@gmail.com" }
@@ -33,6 +33,9 @@ pdomain-ocr-ops-schemas = "pdomain_ocr_ops.schemas.emit:main"
 [project.urls]
 Homepage = "https://github.com/pdomain/pdomain-ocr-ops"
 Source = "https://github.com/pdomain/pdomain-ocr-ops"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pdomain_ocr_ops"]
