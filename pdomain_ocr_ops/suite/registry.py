@@ -90,8 +90,8 @@ class LocalTomlSuiteRegistry:
             ]
             for stale_id in stale_ids:
                 del apps[stale_id]
-            # Write/refresh the new entry
-            apps[app.app_id] = app.model_dump(mode="json")
+            # Write/refresh the new entry — exclude None values: TOML has no null type
+            apps[app.app_id] = app.model_dump(mode="json", exclude_none=True)
             data["apps"] = apps
             self._write_raw(data)
 

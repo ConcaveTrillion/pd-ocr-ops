@@ -35,6 +35,7 @@ class InstalledApp(BaseModel):
     default_port: int
     icon: str
     display_name: str
+    description: str | None = None
     enabled: bool = True
     registered_at: datetime = None  # pyright: ignore[reportAssignmentType]  # Pydantic deferred default via model_post_init
 
