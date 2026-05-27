@@ -9,7 +9,7 @@ from typing_extensions import Protocol
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from pdomain_ocr_ops.gpu.types import JobEvent, JobStatus, StageResult
+    from pdomain_ops.gpu.types import JobEvent, JobStatus, StageResult
 
 
 @runtime_checkable

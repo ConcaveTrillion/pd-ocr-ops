@@ -6,8 +6,8 @@ import time
 import warnings
 from typing import TYPE_CHECKING, Any
 
-from pdomain_ocr_ops.gpu.device import pick_device
-from pdomain_ocr_ops.gpu.types import StageResult
+from pdomain_ops.gpu.device import pick_device
+from pdomain_ops.gpu.types import StageResult
 
 if TYPE_CHECKING:
     from collections.abc import Callable

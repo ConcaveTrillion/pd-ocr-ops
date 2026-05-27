@@ -6,11 +6,11 @@ import asyncio
 
 import pytest
 
-from pdomain_ocr_ops.gpu import (
+from pdomain_ops.gpu import (
     SharedContainerBackend,
     SharedContainerStageDispatcher,
 )
-from pdomain_ocr_ops.gpu.types import ProcessPageRequest
+from pdomain_ops.gpu.types import ProcessPageRequest
 
 
 def test_legacy_alias_points_at_new_class() -> None:

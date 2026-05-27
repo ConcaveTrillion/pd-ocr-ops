@@ -1,9 +1,9 @@
-"""Default stage registration for pdomain-ocr-ops LocalStageDispatcher.
+"""Default stage registration for pdomain-ops LocalStageDispatcher.
 
 Wires DocTR and Tesseract CPU runners from pdomain-book-tools into the
 dispatcher.  Call once at app startup::
 
-    from pdomain_ocr_ops.gpu import LocalStageDispatcher, register_default_stages
+    from pdomain_ops.gpu import LocalStageDispatcher, register_default_stages
     dispatcher = LocalStageDispatcher()
     register_default_stages(dispatcher)
 
@@ -38,7 +38,7 @@ import asyncio
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from pdomain_ocr_ops.gpu.local_stage import LocalStageDispatcher
+    from pdomain_ops.gpu.local_stage import LocalStageDispatcher
 
 
 def register_default_stages(dispatcher: LocalStageDispatcher) -> None:

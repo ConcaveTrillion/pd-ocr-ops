@@ -1,6 +1,6 @@
 import sqlite3
 
-from pdomain_ocr_ops.gpu.local_jobs import init_jobs_db
+from pdomain_ops.gpu.local_jobs import init_jobs_db
 
 
 def test_init_db_creates_jobs_table(tmp_path):

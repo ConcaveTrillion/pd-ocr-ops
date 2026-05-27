@@ -1,6 +1,6 @@
 import pytest
 
-from pdomain_ocr_ops.suite.storage import LocalFsStorage, StorageAdapter
+from pdomain_ops.suite.storage import LocalFsStorage, StorageAdapter
 
 
 def test_protocol_methods_present():

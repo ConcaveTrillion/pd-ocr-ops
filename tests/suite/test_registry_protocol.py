@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.suite.registry import SuiteRegistryAdapter
+from pdomain_ops.suite.registry import SuiteRegistryAdapter
 
 
 def test_protocol_methods_present():

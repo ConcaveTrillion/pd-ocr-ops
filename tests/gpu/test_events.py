@@ -2,7 +2,7 @@
 
 import pytest
 
-from pdomain_ocr_ops.gpu.events import is_event_line, parse_event_line
+from pdomain_ops.gpu.events import is_event_line, parse_event_line
 
 
 def test_is_event_line_recognizes_prefix():

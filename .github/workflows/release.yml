@@ -99,6 +99,6 @@ jobs:
           fi
           gh api -X POST /repos/pdomain/pdomain-index-pip/dispatches \
             -f event_type=pd-release-published \
-            -F 'client_payload[repo]=pdomain-ocr-ops' \
+            -F 'client_payload[repo]=pdomain-ocr-ops' \  # TODO Phase B: update to pdomain-ops after repo rename
             -F "client_payload[tag]=${{ github.event.inputs.tag || github.ref_name }}" || \
             echo "::warning::pdomain-index-pip dispatch failed; index will catch up via 15-min cron"

@@ -2078,7 +2078,7 @@ wheels = [
 ]
 
 [[package]]
-name = "pdomain-ocr-ops"
+name = "pdomain-ops"
 source = { editable = "." }
 dependencies = [
     { name = "fastapi" },

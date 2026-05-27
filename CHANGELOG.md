@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0] - 2026-05-27
+
+### Breaking
+
+- Distribution renamed from `pdomain-ocr-ops` to `pdomain-ops`. The library
+  has outgrown its OCR-specific name — it houses suite plumbing, GPU dispatch,
+  prefs, sibling-spawn, port helpers, and SPA bootstrap that are not OCR-specific.
+- Python import path changed: `pdomain_ocr_ops` → `pdomain_ops`. All
+  downstream consumers must update their dependency pin and imports.
+- Console-script entry point renamed: `pdomain-ocr-ops-schemas` →
+  `pdomain-ops-schemas`.
+
+## [0.2.3] - 2026-05-24
+
+### Added
+
+- `find_available_port` helper and `register_self(actual_port=)` override for
+  SPA bootstrap without EADDRINUSE crashes.
+
 ## [0.2.2] - 2026-05-22
 
 ### Fixed
@@ -18,7 +37,7 @@
 - Replace workspace-local `path = "../pdomain-book-tools"` source override with a git-rev
   reference. uv applies `[tool.uv.sources]` transitively when resolving dependencies
   of a git-pinned package; the relative path anchor constructed an invalid URL
-  (`git+https://…pdomain-ocr-ops.git@v0.2.0#subdirectory=../pdomain-book-tools`) and failed.
+  (`git+https://…pdomain-ops.git@v0.2.0#subdirectory=../pdomain-book-tools`) and failed.
 
 ## [0.2.0] - 2026-05-19
 
@@ -27,10 +46,10 @@
 - GPU dispatch wire-shape types migrated from pdomain-prep-for-pgdp:
   `ProcessPageRequest`, `ProcessPageResponse`, `OcrPageRequest`, `OcrPageResponse`,
   `BatchJobItem`, `BatchJobResult`, `BatchProgressCb`, `GPUBackend` Protocol
-  (`pdomain_ocr_ops.gpu.types`)
+  (`pdomain_ops.gpu.types`)
 - `ModalStageDispatcher` (renamed from `ModalBackend`; legacy alias kept)
 - `SharedContainerStageDispatcher` stub (renamed from `SharedContainerBackend`; legacy alias kept)
-- `modal_app.py` — Modal deploy scaffold for `pdomain-ocr-ops` app name
+- `modal_app.py` — Modal deploy scaffold for `pdomain-ops` app name
 - Optional dep group `modal = ["modal>=0.66"]`
 
 ## [0.1.0] - 2026-05-10

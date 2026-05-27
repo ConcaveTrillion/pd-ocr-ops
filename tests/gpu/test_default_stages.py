@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from pdomain_ocr_ops.gpu import register_default_stages
-from pdomain_ocr_ops.gpu.local_stage import LocalStageDispatcher
+from pdomain_ops.gpu import register_default_stages
+from pdomain_ops.gpu.local_stage import LocalStageDispatcher
 
 
 def test_register_default_stages_registers_ocr_stage() -> None:

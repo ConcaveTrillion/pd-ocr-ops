@@ -9,7 +9,7 @@ Cherry-picked-from: pdomain-prep-for-pgdp@e36c199df466ff45b70d2a452dd7512dcc2a17
 
 from __future__ import annotations
 
-from pdomain_ocr_ops.gpu.types import (
+from pdomain_ops.gpu.types import (
     BatchJobItem,
     BatchJobResult,
     BatchProgressCb,

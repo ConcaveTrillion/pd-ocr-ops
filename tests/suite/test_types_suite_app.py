@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from pdomain_ocr_ops.suite.types import SuiteApp
+from pdomain_ops.suite.types import SuiteApp
 
 
 def test_suite_app_constructs_minimum_fields():

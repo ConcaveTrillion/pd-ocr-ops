@@ -12,7 +12,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 
 def _emit() -> dict:
     result = subprocess.run(
-        [sys.executable, "-m", "pdomain_ocr_ops.schemas"],
+        [sys.executable, "-m", "pdomain_ops.schemas"],
         capture_output=True,
         text=True,
         cwd=str(_REPO_ROOT),

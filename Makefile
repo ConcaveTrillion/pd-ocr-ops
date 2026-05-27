@@ -52,10 +52,10 @@ lint-check: ## Read-only ruff format+check (no auto-fix; matches CI exactly)
 format-check: lint-check ## Alias for lint-check (canonical name for read-only format+lint check)
 
 format: ## Format code
-	uv run ruff format pdomain_ocr_ops tests
+	uv run ruff format pdomain_ops tests
 
 typecheck: ## Run basedpyright at recommended mode (workspace canonical)
-	uv run basedpyright pdomain_ocr_ops --level error
+	uv run basedpyright pdomain_ops --level error
 
 test: ## Run tests with parallelization
 	uv run pytest -n auto

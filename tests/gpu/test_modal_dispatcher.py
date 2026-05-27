@@ -22,7 +22,7 @@ from typing import Any
 
 import pytest
 
-from pdomain_ocr_ops.gpu.types import (
+from pdomain_ops.gpu.types import (
     BatchJobItem,
     OcrPageRequest,
     ProcessPageRequest,
@@ -66,7 +66,7 @@ def modal_module(monkeypatch: pytest.MonkeyPatch) -> dict[tuple[str, str], FakeF
 async def test_process_page_serialises_request_and_validates_response(
     modal_module: dict[tuple[str, str], FakeFunction],
 ) -> None:
-    from pdomain_ocr_ops.gpu.modal_dispatcher import ModalStageDispatcher
+    from pdomain_ops.gpu.modal_dispatcher import ModalStageDispatcher
 
     expected_response = {
         "processed_image_key": "projects/p/processed/x.png",
@@ -77,7 +77,7 @@ async def test_process_page_serialises_request_and_validates_response(
         "cold_start_ms": 12000,
     }
     fn = FakeFunction(return_value=expected_response)
-    modal_module[("pdomain-ocr-ops", "process_page")] = fn
+    modal_module[("pdomain-ops", "process_page")] = fn
 
     dispatcher = ModalStageDispatcher(token_id="x", token_secret="y")
     req = ProcessPageRequest(
@@ -102,7 +102,7 @@ async def test_process_page_serialises_request_and_validates_response(
 async def test_run_ocr_round_trip(
     modal_module: dict[tuple[str, str], FakeFunction],
 ) -> None:
-    from pdomain_ocr_ops.gpu.modal_dispatcher import ModalStageDispatcher
+    from pdomain_ops.gpu.modal_dispatcher import ModalStageDispatcher
 
     fn = FakeFunction(
         return_value={
@@ -111,7 +111,7 @@ async def test_run_ocr_round_trip(
             "text_key": "projects/p/ocr_text/x.txt",
         }
     )
-    modal_module[("pdomain-ocr-ops", "run_ocr")] = fn
+    modal_module[("pdomain-ops", "run_ocr")] = fn
 
     dispatcher = ModalStageDispatcher(token_id="x", token_secret="y")
     resp = await dispatcher.run_ocr(OcrPageRequest(project_id="p", idx0=7))
@@ -124,7 +124,7 @@ async def test_run_ocr_round_trip(
 async def test_run_batch_sends_list_of_dicts(
     modal_module: dict[tuple[str, str], FakeFunction],
 ) -> None:
-    from pdomain_ocr_ops.gpu.modal_dispatcher import ModalStageDispatcher
+    from pdomain_ops.gpu.modal_dispatcher import ModalStageDispatcher
 
     def echo(payload: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return [
@@ -139,7 +139,7 @@ async def test_run_batch_sends_list_of_dicts(
         ]
 
     fn = FakeFunction(return_value=echo)
-    modal_module[("pdomain-ocr-ops", "run_batch")] = fn
+    modal_module[("pdomain-ops", "run_batch")] = fn
 
     dispatcher = ModalStageDispatcher(token_id="x", token_secret="y")
     items = [
@@ -164,7 +164,7 @@ async def test_custom_app_name_routes_to_correct_modal_app(
     modal_module: dict[tuple[str, str], FakeFunction],
 ) -> None:
     """app_name constructor arg lets pgdp-prep keep its 'pgdp-prep' deployment."""
-    from pdomain_ocr_ops.gpu.modal_dispatcher import ModalStageDispatcher
+    from pdomain_ops.gpu.modal_dispatcher import ModalStageDispatcher
 
     fn = FakeFunction(
         return_value={
@@ -182,6 +182,6 @@ async def test_custom_app_name_routes_to_correct_modal_app(
 
 def test_legacy_alias_points_at_new_class() -> None:
     """ModalBackend alias must resolve to ModalStageDispatcher."""
-    from pdomain_ocr_ops.gpu.modal_dispatcher import ModalBackend, ModalStageDispatcher
+    from pdomain_ops.gpu.modal_dispatcher import ModalBackend, ModalStageDispatcher
 
     assert ModalBackend is ModalStageDispatcher

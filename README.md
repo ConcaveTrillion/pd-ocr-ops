@@ -1,9 +1,9 @@
-# pdomain-ocr-ops
+# pdomain-ops
 
 Library + tiny CLI providing suite plumbing, shared prefs, and GPU dispatch adapters
-for the pd-* OCR suite.
+for the pd-* suite.
 
-`pdomain-ocr-ops` is a library (not a daemon) that runs in-process inside each pd-* app's
+`pdomain-ops` is a library (not a daemon) that runs in-process inside each pd-* app's
 FastAPI server. It provides:
 
 - **Suite registry** (`installed.toml`): apps self-register so the AppShell launcher
@@ -20,7 +20,7 @@ FastAPI server. It provides:
 
 ```python
 from fastapi import FastAPI
-from pdomain_ocr_ops import mount_routes
+from pdomain_ops import mount_routes
 
 app = FastAPI()
 mount_routes(app)  # adds /api/suite/*
@@ -34,7 +34,7 @@ record the real port in the suite registry:
 
 ```python
 import uvicorn
-from pdomain_ocr_ops.suite import find_available_port, register_self
+from pdomain_ops.suite import find_available_port, register_self
 
 PREFERRED_PORT = 8004
 
@@ -50,10 +50,10 @@ for the full pattern including stage-2 adoption notes.
 ## JSON Schema for downstream codegen
 
 ```sh
-uv run python -m pdomain_ocr_ops.schemas > schemas.json
+uv run python -m pdomain_ops.schemas > schemas.json
 ```
 
-See `pdomain_ocr_ops/schemas/emit.py::PUBLIC_MODELS` for the registration surface.
+See `pdomain_ops/schemas/emit.py::PUBLIC_MODELS` for the registration surface.
 
 ## Design
 
@@ -61,5 +61,5 @@ Full spec: `docs/specs/2026-05-16-cross-cut-design.md` in the workspace.
 
 Phase 1.7 (shipped in v0.2.0): `pdomain-prep-for-pgdp`'s GPU dispatch primitives
 (`ModalStageDispatcher`, `SharedContainerStageDispatcher`, `register_default_stages()`)
-migrated into `pdomain-ocr-ops`. The registry now ships DocTR and Tesseract OCR stages
+migrated into `pdomain-ops`. The registry now ships DocTR and Tesseract OCR stages
 by default via `register_default_stages()`.

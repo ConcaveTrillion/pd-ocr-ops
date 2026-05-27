@@ -6,7 +6,7 @@ import socket
 
 import pytest
 
-from pdomain_ocr_ops.suite.ports import find_available_port
+from pdomain_ops.suite.ports import find_available_port
 
 
 def _bind_port(port: int, host: str = "127.0.0.1") -> socket.socket:

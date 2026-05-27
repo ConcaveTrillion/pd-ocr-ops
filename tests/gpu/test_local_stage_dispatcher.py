@@ -1,7 +1,7 @@
 import pytest
 
-from pdomain_ocr_ops.gpu.local_stage import LocalStageDispatcher, UnknownStageError
-from pdomain_ocr_ops.gpu.types import StageResult
+from pdomain_ops.gpu.local_stage import LocalStageDispatcher, UnknownStageError
+from pdomain_ops.gpu.types import StageResult
 
 
 @pytest.mark.asyncio

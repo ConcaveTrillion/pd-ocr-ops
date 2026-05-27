@@ -8,9 +8,9 @@ from datetime import UTC, datetime
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from pdomain_ocr_ops import mount_routes
-from pdomain_ocr_ops.suite.registry import LocalTomlSuiteRegistry
-from pdomain_ocr_ops.suite.types import InstalledApp
+from pdomain_ops import mount_routes
+from pdomain_ops.suite.registry import LocalTomlSuiteRegistry
+from pdomain_ops.suite.types import InstalledApp
 
 _NOW = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -70,7 +70,7 @@ def test_e2e_mount_routes_real_fastapi_app(tmp_path, monkeypatch):
 
 def test_e2e_schemas_emit_dump_full(tmp_path):
     result = subprocess.run(
-        [sys.executable, "-m", "pdomain_ocr_ops.schemas"],
+        [sys.executable, "-m", "pdomain_ops.schemas"],
         capture_output=True,
         text=True,
     )

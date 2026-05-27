@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.gpu.protocols import StageDispatcher
+from pdomain_ops.gpu.protocols import StageDispatcher
 
 
 def test_protocol_methods_present():
@@ -8,7 +8,7 @@ def test_protocol_methods_present():
 def test_protocol_is_runtime_checkable():
     class FakeDispatcher:
         async def run_stage(self, stage_id: str, page_id: str, **kwargs):
-            from pdomain_ocr_ops.gpu.types import StageResult
+            from pdomain_ops.gpu.types import StageResult
 
             return StageResult(
                 stage_id=stage_id,
