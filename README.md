@@ -26,6 +26,27 @@ app = FastAPI()
 mount_routes(app)  # adds /api/suite/*
 ```
 
+## Dynamic-port SPA bootstrap
+
+SPAs use `find_available_port` to avoid `EADDRINUSE` crashes when the
+preferred port is already taken, and `register_self(actual_port=port)` to
+record the real port in the suite registry:
+
+```python
+import uvicorn
+from pdomain_ocr_ops.suite import find_available_port, register_self
+
+PREFERRED_PORT = 8004
+
+def main() -> None:
+    port = find_available_port(PREFERRED_PORT)
+    register_self(_caller_package="pdomain_ocr_simple_gui", actual_port=port)
+    uvicorn.run(app, host="127.0.0.1", port=port)
+```
+
+See [`docs/usage/dynamic-port-bootstrap.md`](docs/usage/dynamic-port-bootstrap.md)
+for the full pattern including stage-2 adoption notes.
+
 ## JSON Schema for downstream codegen
 
 ```sh
