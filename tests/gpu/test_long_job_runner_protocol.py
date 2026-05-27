@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.gpu.protocols import LongJobRunner
+from pdomain_ops.gpu.protocols import LongJobRunner
 
 
 def test_protocol_methods_present():
@@ -14,7 +14,7 @@ def test_protocol_is_runtime_checkable():
             return "job-abc"
 
         async def status(self, job_id: str):
-            from pdomain_ocr_ops.gpu.types import JobStatus
+            from pdomain_ops.gpu.types import JobStatus
 
             return JobStatus(job_id=job_id, kind="test", state="queued")
 

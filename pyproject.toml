@@ -3,9 +3,9 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
-name = "pdomain-ocr-ops"
+name = "pdomain-ops"
 dynamic = ["version"]
-description = "Suite plumbing and GPU dispatch adapters for the pd-* OCR suite"
+description = "Suite plumbing and GPU dispatch adapters for the pd-* suite"
 authors = [
     { name = "CT", email = "concavetrillion@gmail.com" }
 ]
@@ -28,17 +28,17 @@ dependencies = [
 modal = ["modal>=0.66"]
 
 [project.scripts]
-pdomain-ocr-ops-schemas = "pdomain_ocr_ops.schemas.emit:main"
+pdomain-ops-schemas = "pdomain_ops.schemas.emit:main"
 
 [project.urls]
-Homepage = "https://github.com/pdomain/pdomain-ocr-ops"
-Source = "https://github.com/pdomain/pdomain-ocr-ops"
+Homepage = "https://github.com/ConcaveTrillion/pdomain-ocr-ops"
+Source = "https://github.com/ConcaveTrillion/pdomain-ocr-ops"
 
 [tool.hatch.version]
 source = "vcs"
 
 [tool.hatch.build.targets.wheel]
-packages = ["pdomain_ocr_ops"]
+packages = ["pdomain_ops"]
 
 [[tool.uv.index]]
 name = "pdomain-index-pip"
@@ -149,7 +149,7 @@ ignore = [
 convention = "google"
 
 [tool.ruff.lint.isort]
-known-first-party = ["pdomain_ocr_ops"]
+known-first-party = ["pdomain_ops"]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests: assert is the idiom (S101); magic numbers common (PLR2004); no
@@ -171,23 +171,23 @@ known-first-party = ["pdomain_ocr_ops"]
 "**/_*.py" = ["D"]
 # GPU device detection: optional-dep probes must catch all exceptions to
 # handle any error cupy/torch may raise (ImportError, RuntimeError, etc.).
-"pdomain_ocr_ops/gpu/device.py" = ["BLE001"]
+"pdomain_ops/gpu/device.py" = ["BLE001"]
 # SQLite job runner: subprocess.Popen is the mechanism; RUF006 fire-and-forget
 # create_task is intentional supervision pattern; BLE001 supervisor catch-all.
-"pdomain_ocr_ops/gpu/local_jobs.py" = ["BLE001", "S603", "RUF006"]
+"pdomain_ops/gpu/local_jobs.py" = ["BLE001", "S603", "RUF006"]
 # Prefs file reader: JSON parse failure treated as empty/default (resilience).
-"pdomain_ocr_ops/suite/prefs.py" = ["BLE001"]
+"pdomain_ops/suite/prefs.py" = ["BLE001"]
 # Registry file reader: TOML parse failure treated as empty registry (resilience).
 # TRY300: try/except structure is the intended read-or-default pattern.
 # S112: try/except/continue to skip stale/corrupt entries is intentional.
-"pdomain_ocr_ops/suite/registry.py" = ["BLE001", "TRY300", "S112"]
+"pdomain_ops/suite/registry.py" = ["BLE001", "TRY300", "S112"]
 # Sibling launcher: subprocess.Popen for app spawning; BLE001 health-poll
 # catch-all (httpx + asyncio can raise many exception types); S110 is
 # intentional poll-until-healthy loop.
-"pdomain_ocr_ops/suite/sibling_spawn.py" = ["BLE001", "S603", "S110"]
+"pdomain_ops/suite/sibling_spawn.py" = ["BLE001", "S603", "S110"]
 
 [tool.basedpyright]
-include = ["pdomain_ocr_ops", "tests", "scripts"]
+include = ["pdomain_ops", "tests", "scripts"]
 exclude = ["**/__pycache__", "**/.venv", "**/node_modules"]
 
 # "recommended" is the workspace-canonical strict mode per 2026-05-17 decisions.
@@ -218,7 +218,7 @@ addopts = [
     "-ra",
     "--strict-markers",
     "--strict-config",
-    "--cov=pdomain_ocr_ops",
+    "--cov=pdomain_ops",
     "--cov-branch",
     "--cov-report=term-missing:skip-covered",
     "--cov-report=html",

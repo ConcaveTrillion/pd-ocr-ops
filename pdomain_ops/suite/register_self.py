@@ -12,7 +12,7 @@ fragment.
 
 Canonical SPA bootstrap pattern (dynamic port)::
 
-    from pdomain_ocr_ops.suite import find_available_port, register_self
+    from pdomain_ops.suite import find_available_port, register_self
 
     PREFERRED_PORT = 8004
 
@@ -71,8 +71,8 @@ def register_self(
     FileNotFoundError
         When the calling package contains no ``pdomain-suite.json`` fragment.
     """
-    from pdomain_ocr_ops.suite.registry import LocalTomlSuiteRegistry
-    from pdomain_ocr_ops.suite.types import InstalledApp
+    from pdomain_ops.suite.registry import LocalTomlSuiteRegistry
+    from pdomain_ops.suite.types import InstalledApp
 
     # --- Resolve the caller package ---
     if _caller_package is None:

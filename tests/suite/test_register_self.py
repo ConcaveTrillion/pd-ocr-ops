@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
-from pdomain_ocr_ops.suite.registry import LocalTomlSuiteRegistry
+from pdomain_ops.suite.registry import LocalTomlSuiteRegistry
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -83,7 +83,7 @@ def test_register_self_reads_fragment_from_caller_package(tmp_path, monkeypatch)
     with _patch_version(pkg_name, "1.2.3"):
         with patch("sys.argv", ["/usr/bin/python3"]):
             # Call register_self as if called from inside fake_suite_app_reads
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(_caller_package=pkg_name, _registry_root=toml_file)
 
@@ -109,7 +109,7 @@ def test_register_self_fills_binary_from_argv(tmp_path, monkeypatch):
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", [argv_path]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(_caller_package=pkg_name, _registry_root=toml_file)
 
@@ -138,7 +138,7 @@ def test_register_self_fills_version_from_importlib_metadata(tmp_path, monkeypat
 
     with _patch_version(pkg_name, "3.4.5"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(_caller_package=pkg_name, _registry_root=toml_file)
 
@@ -165,7 +165,7 @@ def test_register_self_kwargs_override_fragment(tmp_path, monkeypatch):
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(
                 _caller_package=pkg_name,
@@ -203,7 +203,7 @@ def test_register_self_missing_fragment_raises_clear_error(tmp_path, monkeypatch
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             with pytest.raises(FileNotFoundError, match=pkg_name):
                 register_self(_caller_package=pkg_name, _registry_root=toml_file)
@@ -226,7 +226,7 @@ def test_register_self_fragment_with_description(tmp_path, monkeypatch):
 
     with _patch_version(pkg_name, "2.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             # Must not raise extra_forbidden — description must pass through
             register_self(_caller_package=pkg_name, _registry_root=toml_file)
@@ -259,7 +259,7 @@ def test_register_self_actual_port_none_leaves_fragment_port(tmp_path, monkeypat
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(
                 _caller_package=pkg_name,
@@ -290,7 +290,7 @@ def test_register_self_actual_port_overrides_fragment_port(tmp_path, monkeypatch
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             register_self(
                 _caller_package=pkg_name,
@@ -321,7 +321,7 @@ def test_register_self_actual_port_not_appended(tmp_path, monkeypatch):
 
     with _patch_version(pkg_name, "1.0.0"):
         with patch("sys.argv", ["/usr/bin/python3"]):
-            from pdomain_ocr_ops.suite.register_self import register_self
+            from pdomain_ops.suite.register_self import register_self
 
             # Must not raise (extra="forbid" on InstalledApp would raise if
             # actual_port leaks through as an extra field)

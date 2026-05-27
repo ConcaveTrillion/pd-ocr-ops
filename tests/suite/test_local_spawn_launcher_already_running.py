@@ -3,8 +3,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from pdomain_ocr_ops.suite.sibling_spawn import LaunchResultOpened, LocalSpawnLauncher
-from pdomain_ocr_ops.suite.types import InstalledApp
+from pdomain_ops.suite.sibling_spawn import LaunchResultOpened, LocalSpawnLauncher
+from pdomain_ops.suite.types import InstalledApp
 
 _NOW = datetime(2026, 1, 1, tzinfo=UTC)
 

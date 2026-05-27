@@ -10,7 +10,7 @@ from typing import Any, runtime_checkable
 import filelock
 from typing_extensions import Protocol
 
-from pdomain_ocr_ops.suite.types import CommonUIPrefs, UIPrefs
+from pdomain_ops.suite.types import CommonUIPrefs, UIPrefs
 
 
 @runtime_checkable
@@ -35,7 +35,7 @@ class LocalFilePrefs:
 
     def __init__(self, root: Path | None = None) -> None:
         if root is None:
-            from pdomain_ocr_ops.suite.paths import ui_prefs_json_path
+            from pdomain_ops.suite.paths import ui_prefs_json_path
 
             root = ui_prefs_json_path()
         self._path = Path(root)

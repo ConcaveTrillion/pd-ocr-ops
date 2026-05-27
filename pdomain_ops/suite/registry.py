@@ -10,7 +10,7 @@ import tomli
 import tomli_w
 from typing_extensions import Protocol
 
-from pdomain_ocr_ops.suite.types import InstalledApp
+from pdomain_ops.suite.types import InstalledApp
 
 
 @runtime_checkable
@@ -35,7 +35,7 @@ class LocalTomlSuiteRegistry:
 
     def __init__(self, root: Path | None = None) -> None:
         if root is None:
-            from pdomain_ocr_ops.suite.paths import installed_toml_path
+            from pdomain_ops.suite.paths import installed_toml_path
 
             root = installed_toml_path()
         self._path = Path(root)

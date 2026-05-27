@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from pdomain_ocr_ops.suite.types import CommonUIPrefs, UIPrefs
+from pdomain_ops.suite.types import CommonUIPrefs, UIPrefs
 
 
 def test_ui_prefs_defaults_match_spec():

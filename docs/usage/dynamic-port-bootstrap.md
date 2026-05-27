@@ -9,7 +9,7 @@ fallback port just shifts the collision risk to the fallback.
 
 ## Solution
 
-`pdomain_ocr_ops.suite` exposes two helpers that work together:
+`pdomain_ops.suite` exposes two helpers that work together:
 
 - `find_available_port(preferred, host, max_attempts)` — probes the
   preferred port and walks upward until a free one is found.
@@ -20,7 +20,7 @@ fallback port just shifts the collision risk to the fallback.
 
 ```python
 import uvicorn
-from pdomain_ocr_ops.suite import find_available_port, register_self
+from pdomain_ops.suite import find_available_port, register_self
 
 PREFERRED_PORT = 8004
 
@@ -47,7 +47,7 @@ When adopting this pattern in `pdomain-ocr-simple-gui`,
 `pdomain-prep-for-pgdp`, `pdomain-ocr-labeler-spa`, and the trainer SPA:
 
 1. Import `find_available_port` and `register_self` from
-   `pdomain_ocr_ops.suite`.
+   `pdomain_ops.suite`.
 2. Call `find_available_port(PREFERRED_PORT)` before `uvicorn.run`.
 3. Pass the result to both `register_self(actual_port=port)` and
    `uvicorn.run(..., port=port)`.

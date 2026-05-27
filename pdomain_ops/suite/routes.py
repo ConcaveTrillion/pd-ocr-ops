@@ -6,7 +6,7 @@ import time
 
 from fastapi import APIRouter, FastAPI, HTTPException, Request, Response
 
-from pdomain_ocr_ops.suite.types import CommonUIPrefs, InstalledApp, SuiteAdapters
+from pdomain_ops.suite.types import CommonUIPrefs, InstalledApp, SuiteAdapters
 
 _ALLOWED_ICON_SIZES = {1024, 512, 256, 128, 64, 32, 16}
 

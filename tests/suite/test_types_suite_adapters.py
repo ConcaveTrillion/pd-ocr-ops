@@ -1,11 +1,11 @@
 import pytest
 
-from pdomain_ocr_ops.suite.auth import AuthAdapter
-from pdomain_ocr_ops.suite.prefs import PrefsAdapter
-from pdomain_ocr_ops.suite.registry import SuiteRegistryAdapter
-from pdomain_ocr_ops.suite.sibling_spawn import SiblingLaunchAdapter
-from pdomain_ocr_ops.suite.storage import StorageAdapter
-from pdomain_ocr_ops.suite.types import SuiteAdapters
+from pdomain_ops.suite.auth import AuthAdapter
+from pdomain_ops.suite.prefs import PrefsAdapter
+from pdomain_ops.suite.registry import SuiteRegistryAdapter
+from pdomain_ops.suite.sibling_spawn import SiblingLaunchAdapter
+from pdomain_ops.suite.storage import StorageAdapter
+from pdomain_ops.suite.types import SuiteAdapters
 
 
 def test_suite_adapters_local_returns_bundle(tmp_path, monkeypatch):

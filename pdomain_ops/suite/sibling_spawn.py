@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from typing_extensions import Protocol
 
 if TYPE_CHECKING:
-    from pdomain_ocr_ops.suite.types import InstalledApp
+    from pdomain_ops.suite.types import InstalledApp
 
     pass
 

@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import filelock
 
-from pdomain_ocr_ops.suite.prefs import LocalFilePrefs
-from pdomain_ocr_ops.suite.types import CommonUIPrefs, LayerColors
+from pdomain_ops.suite.prefs import LocalFilePrefs
+from pdomain_ops.suite.types import CommonUIPrefs, LayerColors
 
 
 def _make_common(**kwargs) -> CommonUIPrefs:

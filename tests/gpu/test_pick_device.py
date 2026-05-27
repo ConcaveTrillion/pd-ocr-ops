@@ -1,6 +1,6 @@
 import pytest
 
-from pdomain_ocr_ops.gpu.device import pick_device
+from pdomain_ops.gpu.device import pick_device
 
 
 def test_picks_local_when_pd_gpu_backend_local(monkeypatch):
@@ -24,24 +24,24 @@ def test_picks_cpu_when_env_cpu(monkeypatch):
 def test_env_unset_falls_back_to_detection_cuda(monkeypatch):
     monkeypatch.delenv("PDOMAIN_GPU_BACKEND", raising=False)
     monkeypatch.delenv("PGDP_GPU_BACKEND", raising=False)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._cuda_available", lambda: True)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._mps_available", lambda: False)
+    monkeypatch.setattr("pdomain_ops.gpu.device._cuda_available", lambda: True)
+    monkeypatch.setattr("pdomain_ops.gpu.device._mps_available", lambda: False)
     assert pick_device() == "local"
 
 
 def test_env_unset_falls_back_to_detection_mps(monkeypatch):
     monkeypatch.delenv("PDOMAIN_GPU_BACKEND", raising=False)
     monkeypatch.delenv("PGDP_GPU_BACKEND", raising=False)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._cuda_available", lambda: False)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._mps_available", lambda: True)
+    monkeypatch.setattr("pdomain_ops.gpu.device._cuda_available", lambda: False)
+    monkeypatch.setattr("pdomain_ops.gpu.device._mps_available", lambda: True)
     assert pick_device() == "mps"
 
 
 def test_env_unset_falls_back_to_cpu(monkeypatch):
     monkeypatch.delenv("PDOMAIN_GPU_BACKEND", raising=False)
     monkeypatch.delenv("PGDP_GPU_BACKEND", raising=False)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._cuda_available", lambda: False)
-    monkeypatch.setattr("pdomain_ocr_ops.gpu.device._mps_available", lambda: False)
+    monkeypatch.setattr("pdomain_ops.gpu.device._cuda_available", lambda: False)
+    monkeypatch.setattr("pdomain_ops.gpu.device._mps_available", lambda: False)
     assert pick_device() == "cpu"
 
 

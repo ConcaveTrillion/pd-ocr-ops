@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from pdomain_ocr_ops.suite.desktop import install_shortcut, remove_shortcut
-from pdomain_ocr_ops.suite.types import InstalledApp
+from pdomain_ops.suite.desktop import install_shortcut, remove_shortcut
+from pdomain_ops.suite.types import InstalledApp
 
 _NOW = datetime(2026, 1, 1, tzinfo=UTC)
 

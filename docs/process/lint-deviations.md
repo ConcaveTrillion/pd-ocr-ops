@@ -1,4 +1,4 @@
-# Lint-rule Deviations — pdomain-ocr-ops
+# Lint-rule Deviations — pdomain-ops
 
 Standing suppressions and per-file rule overrides in this repo.
 Each entry records: the rule, the tool, the file(s) affected, and the
@@ -13,9 +13,9 @@ Workspace rule: `CONVENTIONS.md` → "Document every lint-rule suppression".
 
 ### 1. `reportMissingImports` — basedpyright
 
-**Files:** `pdomain_ocr_ops/gpu/device.py` (`import cupy`, `import torch`),
-`pdomain_ocr_ops/gpu/modal_dispatcher.py` (`from modal import Function`),
-`pdomain_ocr_ops/gpu/modal_app.py` (`import modal`).
+**Files:** `pdomain_ops/gpu/device.py` (`import cupy`, `import torch`),
+`pdomain_ops/gpu/modal_dispatcher.py` (`from modal import Function`),
+`pdomain_ops/gpu/modal_app.py` (`import modal`).
 
 **Suppression form:** `# pyright: ignore[reportMissingImports]` inline on the
 guarded `import` line.
@@ -33,9 +33,9 @@ required.
 
 **Files:**
 
-- `pdomain_ocr_ops/gpu/device.py` (`torch.backends.mps.is_available()`)
-- `pdomain_ocr_ops/gpu/default_stages.py` (`cv2.imread`)
-- `pdomain_ocr_ops/gpu/modal_dispatcher.py` (`Function.lookup`)
+- `pdomain_ops/gpu/device.py` (`torch.backends.mps.is_available()`)
+- `pdomain_ops/gpu/default_stages.py` (`cv2.imread`)
+- `pdomain_ops/gpu/modal_dispatcher.py` (`Function.lookup`)
 
 **Suppression form:** `# pyright: ignore[reportAttributeAccessIssue]` inline.
 
@@ -49,9 +49,9 @@ install it). All three attributes are correct at runtime.
 
 **Files:**
 
-- `pdomain_ocr_ops/gpu/local_stage.py` (`device=device` argument)
-- `pdomain_ocr_ops/gpu/device.py` (`return explicit`, `return legacy`)
-- `pdomain_ocr_ops/suite/types.py` (`registered_at`, `layer_colors`, `common` fields)
+- `pdomain_ops/gpu/local_stage.py` (`device=device` argument)
+- `pdomain_ops/gpu/device.py` (`return explicit`, `return legacy`)
+- `pdomain_ops/suite/types.py` (`registered_at`, `layer_colors`, `common` fields)
 
 **Suppression form:** `# pyright: ignore[reportArgumentType]`,
 `# pyright: ignore[reportReturnType]`, `# pyright: ignore[reportAssignmentType]`
@@ -71,7 +71,7 @@ inline.
 
 ### 4. `reportUnknownMemberType` / `reportUnknownVariableType` / `reportUntypedFunctionDecorator` — basedpyright
 
-**Files:** `pdomain_ocr_ops/gpu/modal_app.py` (`modal.Image`, `modal.App`,
+**Files:** `pdomain_ops/gpu/modal_app.py` (`modal.Image`, `modal.App`,
 `@app.function` decorators).
 
 **Suppression form:** `# pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]`
@@ -86,7 +86,7 @@ shared rationale. These only surface when the `[modal]` extra is installed.
 
 ### 5. `TC003` — ruff (typing-only-standard-library-import)
 
-**File:** `pdomain_ocr_ops/gpu/types.py` (`from datetime import datetime`).
+**File:** `pdomain_ops/gpu/types.py` (`from datetime import datetime`).
 
 **Suppression form:** `# noqa: TC003` inline.
 
@@ -97,7 +97,7 @@ import under `TYPE_CHECKING` would break model construction.
 
 ### 6. `T201` — ruff (print found)
 
-**File:** `pdomain_ocr_ops/schemas/emit.py` (`print(json.dumps(...))`).
+**File:** `pdomain_ops/schemas/emit.py` (`print(json.dumps(...))`).
 
 **Suppression form:** `# noqa: T201` inline.
 
@@ -106,7 +106,7 @@ schema document to stdout via `print()` is its intended output mechanism.
 
 ### 7. `TRY004` — ruff (type-check-without-type-error)
 
-**File:** `pdomain_ocr_ops/gpu/events.py` (two `raise ValueError` sites after
+**File:** `pdomain_ops/gpu/events.py` (two `raise ValueError` sites after
 `isinstance` checks).
 
 **Suppression form:** `# noqa: TRY004` inline.
@@ -152,11 +152,11 @@ rationale.
 | `scripts/*.py` | `T201, D, S607` | Scripts use `print()`; partial executable paths (`uv`, `git`) are idiomatic. (No `scripts/` dir exists yet — dormant.) |
 | `**/__init__.py` | `D104, F401, TC` | Re-export modules; `F401` is the public-API-surface mechanism. |
 | `**/_*.py` | `D` | Private modules; docstrings not required by internal convention. |
-| `pdomain_ocr_ops/gpu/device.py` | `BLE001` | Optional-dep probes must catch all exceptions (`cupy`/`torch` can raise `ImportError`, `RuntimeError`, etc.). |
-| `pdomain_ocr_ops/gpu/local_jobs.py` | `BLE001, S603, RUF006` | `subprocess.Popen` is the mechanism; fire-and-forget `create_task` is the intentional supervision pattern; supervisor catch-all. |
-| `pdomain_ocr_ops/suite/prefs.py` | `BLE001` | JSON parse failure is treated as empty/default (resilience). |
-| `pdomain_ocr_ops/suite/registry.py` | `BLE001, TRY300, S112` | TOML parse failure treated as empty registry; read-or-default `try`/`except` structure; skip stale/corrupt entries with `try`/`except`/`continue`. |
-| `pdomain_ocr_ops/suite/sibling_spawn.py` | `BLE001, S603, S110` | `subprocess.Popen` for app spawning; health-poll catch-all; intentional poll-until-healthy loop. |
+| `pdomain_ops/gpu/device.py` | `BLE001` | Optional-dep probes must catch all exceptions (`cupy`/`torch` can raise `ImportError`, `RuntimeError`, etc.). |
+| `pdomain_ops/gpu/local_jobs.py` | `BLE001, S603, RUF006` | `subprocess.Popen` is the mechanism; fire-and-forget `create_task` is the intentional supervision pattern; supervisor catch-all. |
+| `pdomain_ops/suite/prefs.py` | `BLE001` | JSON parse failure is treated as empty/default (resilience). |
+| `pdomain_ops/suite/registry.py` | `BLE001, TRY300, S112` | TOML parse failure treated as empty registry; read-or-default `try`/`except` structure; skip stale/corrupt entries with `try`/`except`/`continue`. |
+| `pdomain_ops/suite/sibling_spawn.py` | `BLE001, S603, S110` | `subprocess.Popen` for app spawning; health-poll catch-all; intentional poll-until-healthy loop. |
 
 ---
 
@@ -179,10 +179,10 @@ runtime. Enable incrementally as stub coverage improves.
 `TYPE_CHECKING` guards. Genuine import-order problems surface as runtime
 `ImportError`s, which tests catch.
 
-### 12. CI typecheck scope: `pdomain_ocr_ops` only — NOT `tests/`
+### 12. CI typecheck scope: `pdomain_ops` only — NOT `tests/`
 
 **Config:** `Makefile` `typecheck` target runs
-`basedpyright pdomain_ocr_ops --level error` (the `pdomain_ocr_ops` package only).
+`basedpyright pdomain_ops --level error` (the `pdomain_ops` package only).
 
 **Justification.** `make ci` typechecks the shipped package at error level.
 The `tests/` tree is *not* typechecked by CI: test files contain bare `dict` /
@@ -204,8 +204,8 @@ the bare-`dict`/`list` annotations across the test tree must be type-argument
 
 ### 13. mypy-style `# type: ignore[...]` artifacts — REMOVED
 
-**Files (historical):** `pdomain_ocr_ops/suite/register_self.py`
-(`# type: ignore[attr-defined]`), `pdomain_ocr_ops/gpu/modal_app.py`
+**Files (historical):** `pdomain_ops/suite/register_self.py`
+(`# type: ignore[attr-defined]`), `pdomain_ops/gpu/modal_app.py`
 (`# type: ignore[assignment]`), `tests/suite/test_register_self.py`
 (`# type: ignore[assignment]` ×4), `tests/gpu/test_modal_dispatcher.py`
 (`# type: ignore[type-arg]`).

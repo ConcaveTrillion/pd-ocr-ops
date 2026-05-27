@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.suite.prefs import PrefsAdapter
+from pdomain_ops.suite.prefs import PrefsAdapter
 
 
 def test_protocol_methods_present():
@@ -10,7 +10,7 @@ def test_protocol_methods_present():
 def test_protocol_is_runtime_checkable():
     class FakePrefs:
         def read(self):
-            from pdomain_ocr_ops.suite.types import UIPrefs
+            from pdomain_ops.suite.types import UIPrefs
 
             return UIPrefs()
 

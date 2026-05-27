@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import filelock
 
-from pdomain_ocr_ops.suite.registry import LocalTomlSuiteRegistry
+from pdomain_ops.suite.registry import LocalTomlSuiteRegistry
 
 _SPEC_EXAMPLE_TOML = """
 [apps.pdomain-ocr-labeler-spa]

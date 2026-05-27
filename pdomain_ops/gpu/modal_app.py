@@ -1,4 +1,4 @@
-"""Modal app for pdomain-ocr-ops GPU work. Deployed via ``modal deploy src/pdomain_ocr_ops/gpu/modal_app.py``.
+"""Modal app for pdomain-ops GPU work. Deployed via ``modal deploy src/pdomain_ops/gpu/modal_app.py``.
 
 Cherry-picked-from: pdomain-prep-for-pgdp@e36c199df466ff45b70d2a452dd7512dcc2a17c9
 """
@@ -38,9 +38,9 @@ if _modal_available and modal is not None:
             "Pillow",
         )
         .pip_install_from_pyproject("pyproject.toml")
-        .add_local_python_source("pdomain_ocr_ops")
+        .add_local_python_source("pdomain_ops")
     )
-    app = modal.App("pdomain-ocr-ops", image=image)  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
+    app = modal.App("pdomain-ops", image=image)  # pyright: ignore[reportUnknownMemberType,reportUnknownVariableType]
     GPU_PROFILE = "T4"
     DEFAULT_TIMEOUT_S = 60 * 10
 
@@ -59,7 +59,7 @@ if _modal_available and modal is not None:
     @app.function(gpu=GPU_PROFILE, timeout=DEFAULT_TIMEOUT_S * 6)  # pyright: ignore[reportUnknownMemberType,reportUntypedFunctionDecorator]
     def run_batch(payloads: list[dict[str, object]]) -> list[dict[str, object]]:
         """Scaffold — real batch handler is a separate follow-up plan."""
-        from pdomain_ocr_ops.gpu.types import BatchJobItem, BatchJobResult
+        from pdomain_ops.gpu.types import BatchJobItem, BatchJobResult
 
         results: list[dict[str, object]] = []
         for p in payloads:

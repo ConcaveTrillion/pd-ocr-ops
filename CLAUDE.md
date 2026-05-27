@@ -1,4 +1,4 @@
-# CLAUDE — pdomain-ocr-ops
+# CLAUDE — pdomain-ops
 
 Python ops library for the `pd-*` suite: suite plumbing (registry, prefs,
 sibling-spawn, desktop), GPU dispatch (StageDispatcher / LongJobRunner),

@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import filelock
 
-from pdomain_ocr_ops.suite.prefs import LocalFilePrefs
+from pdomain_ops.suite.prefs import LocalFilePrefs
 
 _SPEC_EXAMPLE_JSON = json.dumps(
     {

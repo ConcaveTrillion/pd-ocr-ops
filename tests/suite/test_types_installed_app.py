@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from pdomain_ocr_ops.suite.types import InstalledApp
+from pdomain_ops.suite.types import InstalledApp
 
 
 def _make_app(**kwargs):

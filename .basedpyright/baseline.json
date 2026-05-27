@@ -1,6 +1,6 @@
 {
     "files": {
-        "./pdomain_ocr_ops/gpu/default_stages.py": [
+        "./pdomain_ops/gpu/default_stages.py": [
             {
                 "code": "reportUnusedParameter",
                 "range": {
@@ -162,7 +162,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/device.py": [
+        "./pdomain_ops/gpu/device.py": [
             {
                 "code": "reportUnknownMemberType",
                 "range": {
@@ -220,7 +220,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/events.py": [
+        "./pdomain_ops/gpu/events.py": [
             {
                 "code": "reportAny",
                 "range": {
@@ -278,7 +278,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/local_jobs.py": [
+        "./pdomain_ops/gpu/local_jobs.py": [
             {
                 "code": "reportUnusedCallResult",
                 "range": {
@@ -632,7 +632,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/local_stage.py": [
+        "./pdomain_ops/gpu/local_stage.py": [
             {
                 "code": "reportExplicitAny",
                 "range": {
@@ -706,7 +706,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/modal_app.py": [
+        "./pdomain_ops/gpu/modal_app.py": [
             {
                 "code": "reportUnknownVariableType",
                 "range": {
@@ -724,7 +724,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/modal_dispatcher.py": [
+        "./pdomain_ops/gpu/modal_dispatcher.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -990,7 +990,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/shared_container_dispatcher.py": [
+        "./pdomain_ops/gpu/shared_container_dispatcher.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -1040,7 +1040,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/gpu/types.py": [
+        "./pdomain_ops/gpu/types.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -1138,7 +1138,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/schemas/emit.py": [
+        "./pdomain_ops/schemas/emit.py": [
             {
                 "code": "reportUnknownVariableType",
                 "range": {
@@ -1148,7 +1148,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/auth.py": [
+        "./pdomain_ops/suite/auth.py": [
             {
                 "code": "reportUnusedParameter",
                 "range": {
@@ -1166,7 +1166,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/desktop.py": [
+        "./pdomain_ops/suite/desktop.py": [
             {
                 "code": "reportUnusedParameter",
                 "range": {
@@ -1184,7 +1184,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/prefs.py": [
+        "./pdomain_ops/suite/prefs.py": [
             {
                 "code": "reportExplicitAny",
                 "range": {
@@ -1282,7 +1282,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/register_self.py": [
+        "./pdomain_ops/suite/register_self.py": [
             {
                 "code": "reportAny",
                 "range": {
@@ -1420,7 +1420,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/registry.py": [
+        "./pdomain_ops/suite/registry.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -1566,7 +1566,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/routes.py": [
+        "./pdomain_ops/suite/routes.py": [
             {
                 "code": "reportUnusedFunction",
                 "range": {
@@ -1904,7 +1904,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/sibling_spawn.py": [
+        "./pdomain_ops/suite/sibling_spawn.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -1930,7 +1930,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/storage.py": [
+        "./pdomain_ops/suite/storage.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {
@@ -1948,7 +1948,7 @@
                 }
             }
         ],
-        "./pdomain_ocr_ops/suite/types.py": [
+        "./pdomain_ops/suite/types.py": [
             {
                 "code": "reportUnannotatedClassAttribute",
                 "range": {

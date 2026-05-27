@@ -3,7 +3,7 @@ import sqlite3
 
 import pytest
 
-from pdomain_ocr_ops.gpu.local_jobs import LocalLongJobRunner
+from pdomain_ops.gpu.local_jobs import LocalLongJobRunner
 
 
 @pytest.fixture

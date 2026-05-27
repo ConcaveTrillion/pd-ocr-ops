@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from pdomain_ocr_ops.gpu.local_jobs import LocalLongJobRunner, UnknownJobError
+from pdomain_ops.gpu.local_jobs import LocalLongJobRunner, UnknownJobError
 
 
 @pytest.fixture

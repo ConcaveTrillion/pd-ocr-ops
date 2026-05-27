@@ -2,8 +2,8 @@
 
 from fastapi import FastAPI
 
-from pdomain_ocr_ops.suite.routes import mount_routes
-from pdomain_ocr_ops.suite.types import SuiteAdapters
+from pdomain_ops.suite.routes import mount_routes
+from pdomain_ops.suite.types import SuiteAdapters
 
 
 class _FakeRegistry:
@@ -19,7 +19,7 @@ class _FakeRegistry:
 
 class _FakePrefs:
     def read(self):
-        from pdomain_ocr_ops.suite.types import UIPrefs
+        from pdomain_ops.suite.types import UIPrefs
 
         return UIPrefs()
 
@@ -32,14 +32,14 @@ class _FakePrefs:
 
 class _FakeLauncher:
     async def launch(self, app):
-        from pdomain_ocr_ops.suite.sibling_spawn import LaunchResultOpened
+        from pdomain_ops.suite.sibling_spawn import LaunchResultOpened
 
         return LaunchResultOpened(url="http://localhost:8001", spawned=False)
 
 
 class _FakeAuth:
     async def authenticate(self, request):
-        from pdomain_ocr_ops.suite.auth import Identity
+        from pdomain_ops.suite.auth import Identity
 
         return Identity(user_id="local", display_name="Local User")
 

@@ -1,4 +1,4 @@
-"""Emit JSON Schema for all public Pydantic models in pdomain_ocr_ops."""
+"""Emit JSON Schema for all public Pydantic models in pdomain_ops."""
 
 from __future__ import annotations
 
@@ -6,13 +6,13 @@ import json
 
 from pydantic import TypeAdapter
 
-from pdomain_ocr_ops.gpu.types import JobEvent, JobSpec, JobStatus, StageResult
-from pdomain_ocr_ops.suite.sibling_spawn import (
+from pdomain_ops.gpu.types import JobEvent, JobSpec, JobStatus, StageResult
+from pdomain_ops.suite.sibling_spawn import (
     LaunchResult,
     LaunchResultOpened,
     LaunchResultRequiresHostConfig,
 )
-from pdomain_ocr_ops.suite.types import (
+from pdomain_ops.suite.types import (
     CommonUIPrefs,
     InstalledApp,
     LayerColors,

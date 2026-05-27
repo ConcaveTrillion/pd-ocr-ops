@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.suite.paths import (
+from pdomain_ops.suite.paths import (
     installed_toml_path,
     jobs_db_path,
     suite_data_dir,

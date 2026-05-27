@@ -3,7 +3,7 @@
 This is the canonical home for Modal-based GPU dispatch in the pd-* suite.
 Deploy the companion app with::
 
-    modal deploy src/pdomain_ocr_ops/gpu/modal_app.py
+    modal deploy src/pdomain_ops/gpu/modal_app.py
 
 Cherry-picked-from: pdomain-prep-for-pgdp@e36c199df466ff45b70d2a452dd7512dcc2a17c9
 """
@@ -13,7 +13,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from pdomain_ocr_ops.gpu.types import (
+from pdomain_ops.gpu.types import (
     BatchJobItem,
     BatchJobResult,
     BatchProgressCb,
@@ -33,7 +33,7 @@ class ModalStageDispatcher(GPUBackend):
     Args:
         token_id: Modal API token ID.
         token_secret: Modal API token secret.
-        app_name: Modal app name to look up. Defaults to ``"pdomain-ocr-ops"``.
+        app_name: Modal app name to look up. Defaults to ``"pdomain-ops"``.
             Pass ``"pgdp-prep"`` to keep an existing pgdp-prep deployment
             alive during the migration window.
     """
@@ -47,7 +47,7 @@ class ModalStageDispatcher(GPUBackend):
         self,
         token_id: str,
         token_secret: str,
-        app_name: str = "pdomain-ocr-ops",
+        app_name: str = "pdomain-ops",
     ) -> None:
         self._token_id = token_id
         self._token_secret = token_secret
@@ -65,7 +65,7 @@ class ModalStageDispatcher(GPUBackend):
         except ImportError as e:
             raise RuntimeError(
                 "Modal backend requires the [modal] extra: install with"
-                " 'pip install pdomain-ocr-ops[modal]'"
+                " 'pip install pdomain-ops[modal]'"
             ) from e
         # modal stubs omit Function.lookup (valid at runtime); only surfaces
         # when the [modal] extra is installed.

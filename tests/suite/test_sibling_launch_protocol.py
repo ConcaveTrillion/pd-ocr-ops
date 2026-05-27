@@ -1,4 +1,4 @@
-from pdomain_ocr_ops.suite.sibling_spawn import (
+from pdomain_ops.suite.sibling_spawn import (
     LaunchResultOpened,
     LaunchResultRequiresHostConfig,
     SiblingLaunchAdapter,
