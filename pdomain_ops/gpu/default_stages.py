@@ -35,10 +35,20 @@ the impl (an ``ImportError`` is re-raised with a clear message).
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from pdomain_ops.gpu.local_stage import LocalStageDispatcher
+
+_log = logging.getLogger(__name__)
+
+# Predictor cache keyed by ``(str(det_path), str(reco_path))``.  Building the
+# finetuned DocTR predictor (load .pt files + ``.to(device)``) costs hundreds
+# of ms per call; the underlying HF files are cached by huggingface_hub but
+# the in-memory torch module is not.  Cache lives at module scope so every
+# call in the same process reuses one predictor per (det, reco) pair.
+_predictor_cache: dict[tuple[str, str], Any] = {}
 
 
 def register_default_stages(dispatcher: LocalStageDispatcher) -> None:
@@ -49,12 +59,21 @@ def register_default_stages(dispatcher: LocalStageDispatcher) -> None:
     * ``("ocr", "cpu")`` — unified DocTR/Tesseract CPU runner.  Engine
       is selected at call time via ``kwargs["engine"]``
       (``"doctr"`` or ``"tesseract"``; defaults to ``"doctr"``).
+    * ``("ocr", "local")`` — DocTR runner using finetuned weights from
+      HF (``CT2534/pd-ocr-models``) on the autoselected torch device
+      (CUDA > MPS > CPU).  Falls through to the cpu impl on network /
+      HF errors.
+    * ``("ocr", "mps")`` — same impl as ``("ocr", "local")``; the
+      finetuned predictor builder already handles MPS via torch's
+      device autoselection.
 
     Calling this function more than once on the same dispatcher replaces
     the existing registrations with a ``UserWarning`` (standard
     ``LocalStageDispatcher`` behaviour).
     """
     dispatcher.register_stage("ocr", "cpu", _ocr_cpu_impl)
+    dispatcher.register_stage("ocr", "local", _ocr_local_impl)
+    dispatcher.register_stage("ocr", "mps", _ocr_local_impl)
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +125,89 @@ def _make_doctr_sync(*, image_path: str, page_id: str) -> Any:
         doc = Document.from_image_ocr_via_doctr(
             image=image_path,
             source_identifier=page_id,
+        )
+        pages = doc.pages
+        if not pages:
+            return {"pages": []}
+        return {"pages": [p.to_dict() for p in pages]}
+
+    return _run
+
+
+async def _ocr_local_impl(page_id: str, device: str, **kwargs: Any) -> dict[str, Any]:
+    """GPU/finetuned OCR stage — DocTR with CT2534 finetuned weights.
+
+    Resolves the finetuned detection + recognition ``.pt`` files via
+    :func:`pdomain_book_tools.hf.resolve_ocr_models` (defaults pull from
+    ``CT2534/pd-ocr-models``), builds the predictor on the autoselected
+    torch device, and passes it to
+    :meth:`pdomain_book_tools.ocr.document.Document.from_image_ocr_via_doctr`.
+
+    Tesseract isn't GPU-bound, so when ``engine="tesseract"`` this impl
+    delegates to the same Tesseract path the CPU impl uses.
+
+    On any HF resolution / network failure this impl logs a warning and
+    falls through to :func:`_ocr_cpu_impl` so the stage still succeeds on
+    stock CPU weights.
+    """
+    image_path: str = kwargs.get("image_path", "")
+    engine: str = kwargs.get("engine", "doctr")
+    language: str = kwargs.get("language", "eng")
+
+    if engine == "tesseract":
+        loop = asyncio.get_event_loop()
+        fn = _make_tesseract_sync(image_path=image_path, page_id=page_id, language=language)
+        return await loop.run_in_executor(None, fn)
+
+    # DocTR + finetuned weights.  Resolve paths; on network/HF failure
+    # fall through to the stock-CPU impl.
+    try:
+        from pdomain_book_tools.hf import resolve_ocr_models
+
+        det_path, reco_path = resolve_ocr_models()
+    except Exception as exc:  # noqa: BLE001 — intentional broad catch for graceful fallback
+        _log.warning(
+            "resolve_ocr_models() failed (%s: %s); falling through to stock CPU OCR.",
+            type(exc).__name__,
+            exc,
+        )
+        return await _ocr_cpu_impl(page_id, device, **kwargs)
+
+    loop = asyncio.get_event_loop()
+    fn = _make_doctr_finetuned_sync(
+        image_path=image_path,
+        page_id=page_id,
+        det_path=str(det_path),
+        reco_path=str(reco_path),
+    )
+    return await loop.run_in_executor(None, fn)
+
+
+def _make_doctr_finetuned_sync(
+    *,
+    image_path: str,
+    page_id: str,
+    det_path: str,
+    reco_path: str,
+) -> Any:
+    """Return a zero-arg callable that runs finetuned DocTR OCR synchronously."""
+
+    def _run() -> dict[str, Any]:
+        from pdomain_book_tools.ocr.doctr_support import (
+            get_finetuned_torch_doctr_predictor,
+        )
+        from pdomain_book_tools.ocr.document import Document
+
+        cache_key = (det_path, reco_path)
+        predictor = _predictor_cache.get(cache_key)
+        if predictor is None:
+            predictor = get_finetuned_torch_doctr_predictor(det_path, reco_path)
+            _predictor_cache[cache_key] = predictor
+
+        doc = Document.from_image_ocr_via_doctr(
+            image=image_path,
+            source_identifier=page_id,
+            predictor=predictor,
         )
         pages = doc.pages
         if not pages:
