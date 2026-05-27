@@ -207,3 +207,32 @@ def test_register_self_missing_fragment_raises_clear_error(tmp_path, monkeypatch
 
             with pytest.raises(FileNotFoundError, match=pkg_name):
                 register_self(_caller_package=pkg_name, _registry_root=toml_file)
+
+
+def test_register_self_fragment_with_description(tmp_path, monkeypatch):
+    """register_self() succeeds when pdomain-suite.json includes a description field."""
+    pkg_name = "fake_suite_app_description"
+    fragment = {
+        "app_id": "pd-desc-app",
+        "display_name": "Description App",
+        "package": pkg_name,
+        "default_port": 8050,
+        "icon": "description",
+        "description": "A human-readable description of this app",
+    }
+    _make_fake_pkg(tmp_path, pkg_name, fragment)
+    monkeypatch.setenv("PD_SUITE_DATA_DIR", str(tmp_path))
+    toml_file = tmp_path / "installed.toml"
+
+    with _patch_version(pkg_name, "2.0.0"):
+        with patch("sys.argv", ["/usr/bin/python3"]):
+            from pdomain_ocr_ops.suite.register_self import register_self
+
+            # Must not raise extra_forbidden — description must pass through
+            register_self(_caller_package=pkg_name, _registry_root=toml_file)
+
+    registry = LocalTomlSuiteRegistry(root=toml_file)
+    apps = registry.list_installed()
+    matching = [a for a in apps if a.app_id == "pd-desc-app"]
+    assert matching, "app not registered"
+    assert matching[0].description == "A human-readable description of this app"

@@ -38,3 +38,24 @@ def test_installed_app_roundtrip():
     data = app.model_dump(mode="json")
     roundtripped = InstalledApp.model_validate(data)
     assert roundtripped == app
+
+
+def test_installed_app_accepts_description():
+    """InstalledApp must accept description (mirrors SuiteApp field)."""
+    app = _make_app(description="An OCR labeling tool")
+    assert app.description == "An OCR labeling tool"
+
+
+def test_installed_app_description_defaults_none():
+    """InstalledApp.description defaults to None when omitted."""
+    app = _make_app()
+    assert app.description is None
+
+
+def test_installed_app_description_roundtrip():
+    """InstalledApp with description round-trips through model_dump / model_validate."""
+    app = _make_app(description="round-trip check")
+    data = app.model_dump(mode="json")
+    roundtripped = InstalledApp.model_validate(data)
+    assert roundtripped == app
+    assert roundtripped.description == "round-trip check"
