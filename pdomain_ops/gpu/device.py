@@ -10,11 +10,24 @@ _VALID_DEVICES = frozenset({"local", "mps", "cpu"})
 
 
 def _cuda_available() -> bool:
-    """Return True if a CUDA-capable GPU is accessible."""
+    """Return True if a CUDA-capable GPU is accessible.
+
+    Probes cupy first (the [gpu] extra's marker dep). Falls back to
+    torch.cuda — torch is the runtime that actually executes OCR via
+    DocTR, so a torch-visible CUDA device is sufficient even without
+    cupy installed.
+    """
     try:
         import cupy  # pyright: ignore[reportMissingImports]  # optional GPU dep; installed via [gpu] extra
 
-        return cupy.cuda.runtime.getDeviceCount() > 0
+        if cupy.cuda.runtime.getDeviceCount() > 0:
+            return True
+    except Exception:
+        pass
+    try:
+        import torch  # pyright: ignore[reportMissingImports]  # optional GPU dep; installed via [gpu] extra
+
+        return torch.cuda.is_available() and torch.cuda.device_count() > 0
     except Exception:
         return False
 
