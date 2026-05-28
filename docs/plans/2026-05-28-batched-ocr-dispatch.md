@@ -1,8 +1,31 @@
 ---
 repo: ConcaveTrillion/ocr-container-meta
 plan_type: cross-cut
-status: draft
+status: waves-1-4-done-wave-5-deferred
 synced: never
+---
+
+> **Implementation status (2026-05-28).** Waves 1–4 are implemented and merged
+> locally (unpushed) across pdomain-book-tools, pdomain-ops, pdomain-ocr-simple-gui,
+> and pdomain-ocr-cli:
+> - **Task 1** ✅ book-tools `det_bs`/`reco_bs` kwargs + `from_images_ocr_via_doctr`.
+> - **Task 2** ✅ ops `pick_doctr_batch_sizes`.
+> - **Task 3** ✅ ops shared `run_doctr_batch` worker (returns `Page` objects) +
+>   `StageDispatcher.run_ocr_batch` Protocol seam + `OcrBatchRequest` DTO (incl.
+>   `device`) + sized predictor cache + OOM backoff; remote dispatchers raise
+>   `NotImplementedError` (Wave 5 stubs).
+> - **Task 4** ✅ simple-gui chunked dispatch + `batch_pages` + device forwarding.
+> - **Task 5** ✅ cli batched OCR via the worker (`--batch-pages`); pdomain-ops
+>   resolved from the workspace sibling until it's published (TODO(release) in
+>   cli pyproject).
+> - **Task 6** ➖ N/A — labeler-spa / trainer-spa have no OCR-dispatch call sites.
+> - **Task 7 / Wave 5** ⏸ DEFERRED (below) — remote Modal/server backends. The
+>   seam is in place; the deferred stubs point here.
+>
+> **Pending release work** (separate from this plan): push + release pd-* repos to
+> the indexes (book-tools → ops → ui), then flip cli's `pdomain-ops` source from the
+> sibling path to `{ index = "pdomain-index-pip" }`.
+
 ---
 
 # Batched OCR Dispatch — VRAM-aware GPU batching with OOM backoff
