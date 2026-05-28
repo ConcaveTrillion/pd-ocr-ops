@@ -171,7 +171,8 @@ known-first-party = ["pdomain_ops"]
 "**/_*.py" = ["D"]
 # GPU device detection: optional-dep probes must catch all exceptions to
 # handle any error cupy/torch may raise (ImportError, RuntimeError, etc.).
-"pdomain_ops/gpu/device.py" = ["BLE001"]
+# S110: try/except/pass is the correct idiom for optional-dep probe fallthrough.
+"pdomain_ops/gpu/device.py" = ["BLE001", "S110"]
 # SQLite job runner: subprocess.Popen is the mechanism; RUF006 fire-and-forget
 # create_task is intentional supervision pattern; BLE001 supervisor catch-all.
 "pdomain_ops/gpu/local_jobs.py" = ["BLE001", "S603", "RUF006"]

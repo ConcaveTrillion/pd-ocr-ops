@@ -85,14 +85,15 @@ def pick_device() -> Literal["local", "mps", "cpu"]:
 
 def _physical_cores() -> int:
     """Physical CPU core count (falls back to 1). Prefers physical over
-    logical so torch's intra-op threads don't oversubscribe hyperthreads."""
+    logical so torch's intra-op threads don't oversubscribe hyperthreads.
+    """
     try:
         import psutil  # pyright: ignore[reportMissingImports]  # optional dep
 
         cores = psutil.cpu_count(logical=False)
         if cores:
             return int(cores)
-    except Exception:  # noqa: BLE001 - best-effort; fall through to os
+    except Exception:
         pass
     return os.cpu_count() or 1
 
@@ -106,13 +107,90 @@ def _cuda_free_bytes() -> int | None:
             return None
         free, _total = torch.cuda.mem_get_info()
         return int(free)
-    except Exception:  # noqa: BLE001 - best-effort detection
+    except Exception:
         return None
 
 
 # Heuristic VRAM budget for one DocTR predictor's working set (detection +
 # recognition + activations). Conservative; tune against real OOM behaviour.
 _VRAM_PER_WORKER_BYTES = 2_500_000_000
+
+# ---------------------------------------------------------------------------
+# DocTR batch-size sizing constants
+# ---------------------------------------------------------------------------
+
+# Conservative estimate of peak VRAM consumed by the detection CNN while
+# processing one full-resolution page tensor (backbone + activations).
+# Real peak is image-size dependent; 1.2 GB covers A4 at typical scan DPI.
+# Tune downward if OOM is observed in production; tune upward to allow larger
+# batches on high-VRAM cards.
+_VRAM_PER_PAGE_BYTES: int = 1_200_000_000
+
+# Estimated average number of text crops produced per page by the DocTR
+# detection stage.  Used to scale reco_bs relative to the chunk size so the
+# recognition stage can process all crops from a chunk in a single forward
+# pass when VRAM allows.
+_CROPS_PER_PAGE_EST: int = 48
+
+# Hard ceiling for reco_bs.  Recognition crops are small tensors, but GPU
+# memory is still finite.  512 is safe for 8-24 GB VRAM cards.
+_RECO_CEILING: int = 512
+
+
+def pick_doctr_batch_sizes(
+    device: str | None = None,
+    chunk_pages: int = 8,
+) -> tuple[int, int]:
+    """Recommend (det_bs, reco_bs) for a DocTR predictor on *device*.
+
+    Parameters
+    ----------
+    device:
+        One of ``"local"`` (CUDA), ``"mps"``, ``"cpu"``, or ``None`` to
+        auto-detect via :func:`pick_device`.
+    chunk_pages:
+        Number of pages in the batch being dispatched.  Used to scale
+        ``reco_bs`` so the recognition stage can process all crops from the
+        chunk in a single forward pass when VRAM allows.
+
+    Returns:
+    -------
+    (det_bs, reco_bs):
+        Both values are ints >= 1.
+
+        * ``det_bs`` — detection batch size.  Each entry is a full-resolution
+          page tensor; VRAM constrains this tightly.  DocTR default is 2.
+        * ``reco_bs`` — recognition batch size.  Crops are small so this is
+          bounded by crop supply (approx pages x ``_CROPS_PER_PAGE_EST``), not
+          VRAM.  DocTR default is 128.
+
+    GPU path
+    --------
+    Queries free VRAM via :func:`_cuda_free_bytes`.  If unavailable, returns
+    the conservative fallback ``(2, 128)``.  Otherwise::
+
+        det_bs  = clamp(1, 8, free_bytes // _VRAM_PER_PAGE_BYTES)
+        reco_bs = clamp(128, _RECO_CEILING, chunk_pages * _CROPS_PER_PAGE_EST)
+
+    CPU path
+    --------
+    Returns ``(1, 128)``.  torch is internally multi-threaded so a det_bs of
+    1 avoids memory pressure while still benefiting from intra-op parallelism.
+    """
+    resolved = device or pick_device()
+
+    if resolved == "cpu":
+        return (1, 128)
+
+    # GPU / MPS path
+    free = _cuda_free_bytes()
+    if free is None:
+        # torch unavailable or probe failed — conservative DocTR defaults
+        return (2, 128)
+
+    det_bs = max(1, min(8, free // _VRAM_PER_PAGE_BYTES))
+    reco_bs = min(_RECO_CEILING, max(128, chunk_pages * _CROPS_PER_PAGE_EST))
+    return (det_bs, reco_bs)
 
 
 def pick_concurrency(device: str | None = None) -> int:
