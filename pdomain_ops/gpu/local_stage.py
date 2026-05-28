@@ -109,7 +109,7 @@ class LocalStageDispatcher:
         from pdomain_ops.gpu.default_stages import _predictor_cache
         from pdomain_ops.gpu.doctr_batch import run_doctr_batch
 
-        device = pick_device()
+        device = req.device or pick_device()
         det_bs, reco_bs = pick_doctr_batch_sizes(device, len(req.images))
 
         def _get_or_build_predictor(d_bs: int, r_bs: int) -> Any:

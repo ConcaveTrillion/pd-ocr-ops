@@ -129,6 +129,9 @@ class OcrBatchRequest(DispatchModel):
     engine: Literal["doctr", "tesseract"] = "doctr"
     language: str = "eng"
     model_key: str | None = None
+    # Optional device override ("cpu"/"local"/"mps"); None = auto-detect.
+    # Lets a caller forward a user's CPU/GPU choice; the dispatcher honors it.
+    device: str | None = None
 
 
 class OcrPageResponse(DispatchModel):
