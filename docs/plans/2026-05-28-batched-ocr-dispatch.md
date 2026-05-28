@@ -127,6 +127,49 @@ OOM** so real bugs surface. Before rebuilding, `del` the old predictor reference
 `torch.cuda.empty_cache()` so the failed allocation's reserved blocks are released —
 otherwise the retry OOMs again.
 
+### Backend portability — shims now, remote impls deferred
+
+We will eventually run OCR on a remote GPU (a persistent server, or Modal serverless).
+pdomain-ops already has the dispatcher abstractions for this: `StageDispatcher` Protocol,
+`LocalStageDispatcher`, `ModalStageDispatcher` (with `run_batch` + `run_ocr` and
+`OcrPageRequest`/`OcrPageResponse` DTOs), and `SharedContainerStageDispatcher`. **The
+remote implementations are out of scope for this plan (future release), but the *seam* must
+be put in place now** so local-first work doesn't bake in a local-only interface we'd have
+to rip out.
+
+Three rules keep the seam clean:
+
+1. **Worker / orchestration split.**
+   - *Orchestration* (chunking, per-chunk failure isolation, progress) is **client-side and
+     dispatcher-agnostic** — it stays in the consumer (simple-gui `run_project`) and calls a
+     Protocol method, never a concrete dispatcher. For a remote backend, each chunk is one
+     remote invocation that autoscales across containers — same code, more parallelism.
+   - *Worker* (det_bs/reco_bs sizing, OOM backoff, `predictor([...])`) must run **where the
+     GPU is**. Package it as one location-independent function
+     `pdomain_ops.gpu.doctr_batch.run_doctr_batch(images, predictor, *, device) -> list[page_dict]`
+     that both `LocalStageDispatcher` and (future) the Modal function import and call. OOM
+     backoff + sizing then run GPU-side in either deployment.
+
+2. **Data, not paths, at the dispatcher boundary.** The batch stage interface carries image
+   **bytes / ndarrays** (reuse the existing `OcrPageRequest`-style DTO), so the same call
+   works locally (read path → bytes) and remotely (ship bytes). A path-based interface only
+   works on a shared filesystem and would have to be replaced for remote — so go data-first
+   now.
+
+3. **Predictor warmth is the dispatcher's business.** `run_doctr_batch` **accepts** a
+   predictor (or a build callback) — it does not own a cache. Local uses the module-level
+   sized cache; a remote container uses its own warm-load lifecycle (e.g. Modal
+   `@modal.enter()`). The worker stays warmth-agnostic.
+
+**What ships in this plan (the shims):** the `run_doctr_batch` worker, the batch method on
+the `StageDispatcher` Protocol, the data-carrying request/response DTOs, and the
+`LocalStageDispatcher` implementation. **What is deferred (Wave 5):** wiring
+`modal_app.run_batch` / `ModalStageDispatcher` / `SharedContainerStageDispatcher` to the
+shared worker, image-bytes transport over the wire, and deploy config. Those land in a
+future release; the Protocol-conformant remote dispatchers may remain stubs
+(`NotImplementedError` with a TODO pointing at Wave 5) until then — the point is the
+*interface* exists so consumers and the worker are already backend-agnostic.
+
 ---
 
 ## Parallelization — execution waves
@@ -240,37 +283,65 @@ Set `model: sonnet` on implementers.
 
 ## Wave 2 — ops batched stage + OOM backoff (Task 3, single)
 
-### Task 3: ops — batched stage impl, OOM backoff, sized predictor cache
+### Task 3: ops — shared batch worker, Protocol seam, Local impl + OOM backoff
 
 **Repo:** `pdomain-ops` · **Worktree:** `.claude/worktrees/batch-stage` · **Model:** sonnet
 **Depends on:** Task 1 (batch entry point) + Task 2 (`pick_doctr_batch_sizes`).
 
-**Files:**
-- Modify: `pdomain_ops/gpu/default_stages.py` (`_ocr_local_impl`, module predictor cache,
-  new batched impl + registration), `pdomain_ops/gpu/local_stage.py` (batch dispatch entry)
-- Test: `tests/gpu/test_default_stages.py`
+This task lands the **backend-portability seam** (see Design): a location-independent
+worker, the Protocol batch method, and data-carrying DTOs — with the **Local** impl built
+and the **remote** dispatchers left as Protocol-conformant deferred stubs.
 
-- [ ] **Step 1 — cache-key test.** Assert the module predictor cache returns **distinct**
-      predictors for `(det_path, reco_path, det_bs=2)` vs `(…, det_bs=4)` (today keyed only
-      on paths). Monkeypatch `get_finetuned_torch_doctr_predictor` to a call counter.
-- [ ] **Step 2 — run, verify fail** (same predictor returned for both).
-- [ ] **Step 3 — implement** cache key `(str(det_path), str(reco_path), det_bs, reco_bs)`.
-- [ ] **Step 4 — OOM-backoff tests.** (a) Stub predictor raises
-      `torch.cuda.OutOfMemoryError` on first call then succeeds → assert det_bs halved
-      (8→4), `torch.cuda.empty_cache` called, chunk result returned. (b) det_bs=1 OOM →
-      delegates to `_ocr_cpu_impl` (assert CPU path invoked, warning logged). (c) non-OOM
-      `RuntimeError` re-raises unchanged.
-- [ ] **Step 5 — run, verify fail.**
-- [ ] **Step 6 — implement** a batched impl accepting `image_paths: list[str]`: size via
-      `pick_doctr_batch_sizes`, call `from_images_ocr_via_doctr` through the cached
-      predictor inside the backoff loop — `_is_oom(e)` (torch OOM **or** RuntimeError
-      "out of memory" **or** `MemoryError` on CPU); on OOM `del predictor;
-      torch.cuda.empty_cache()`, halve det_bs/reco_bs, rebuild via cache, retry; floor
-      (det_bs==1) → per-image `_ocr_cpu_impl`. Return a list of page dicts (one per input).
-      Register a batch stage key and add `run_batch_stage` to `LocalStageDispatcher`
-      (keep single-image `run_stage` as a back-compat wrapper).
-- [ ] **Step 7 — run, verify pass; `make typecheck`; `make test AI=1`.**
-- [ ] **Step 8 — commit:** `feat(gpu): batched OCR stage with OOM backoff + sized cache`.
+**Files:**
+- Create: `pdomain_ops/gpu/doctr_batch.py` (the shared `run_doctr_batch` worker)
+- Modify: `pdomain_ops/gpu/types.py` (batch request/response DTO carrying image **bytes** —
+  reuse/extend the existing `OcrPageRequest`/`OcrPageResponse`)
+- Modify: `pdomain_ops/gpu/protocols.py` (add the batch method to `StageDispatcher`)
+- Modify: `pdomain_ops/gpu/default_stages.py` (sized predictor cache), `local_stage.py`
+  (`LocalStageDispatcher` batch method → reads paths/bytes → calls `run_doctr_batch`)
+- Modify: `modal_dispatcher.py`, `shared_container_dispatcher.py` (Protocol-conformant
+  **deferred stubs** — `raise NotImplementedError("Wave 5: remote batch")`)
+- Test: `tests/gpu/test_doctr_batch.py` (new), `tests/gpu/test_default_stages.py`,
+  `tests/gpu/test_stage_dispatcher_protocol.py`
+
+- [ ] **Step 1 — Protocol + DTO shim test.** Assert `StageDispatcher` declares the batch
+      method and that the batch request DTO carries image bytes (construct one with two
+      `bytes` payloads). Keep it a structural/`runtime_checkable` check.
+- [ ] **Step 2 — run, verify fail.**
+- [ ] **Step 3 — implement the seam.** Add the batch method to the `StageDispatcher`
+      Protocol (align the name with the existing `run_batch` on `ModalStageDispatcher`); add
+      the batch request/response DTO to `types.py` carrying `images: list[bytes]` + per-image
+      ids (reuse `OcrPageRequest`/`OcrPageResponse` shape). No path-only fields at the
+      boundary.
+- [ ] **Step 4 — worker test.** In `test_doctr_batch.py`, stub a predictor; assert
+      `run_doctr_batch([ndarray_a, ndarray_b], predictor=stub, device="cpu")` returns two
+      page dicts in order and calls the predictor once with a 2-element list.
+- [ ] **Step 5 — run, verify fail** (module missing).
+- [ ] **Step 6 — implement `run_doctr_batch`** in `doctr_batch.py`: decode inputs to
+      ndarrays if bytes, size via `pick_doctr_batch_sizes(device, len(images))`, call
+      book-tools `from_images_ocr_via_doctr` through the **passed-in** predictor inside the
+      OOM-backoff loop — `_is_oom(e)` (torch OOM **or** RuntimeError "out of memory" **or**
+      `MemoryError`); on OOM `del predictor; torch.cuda.empty_cache()`, halve det_bs/reco_bs,
+      ask the caller's build callback to rebuild smaller, retry; floor (det_bs==1) →
+      per-image CPU fallback. It does **not** own a predictor cache — warmth is the
+      dispatcher's job (it receives the predictor / build callback).
+- [ ] **Step 7 — cache-key test + impl.** Sized module cache in `default_stages.py` keyed on
+      `(str(det_path), str(reco_path), det_bs, reco_bs)` returns distinct predictors per
+      size (monkeypatch `get_finetuned_torch_doctr_predictor` to a counter). Implement.
+- [ ] **Step 8 — OOM-backoff tests via the Local impl.** (a) predictor raises
+      `torch.cuda.OutOfMemoryError` once then succeeds → det_bs halves, `empty_cache`
+      called, result returned. (b) det_bs=1 OOM → CPU fallback path invoked, warning logged.
+      (c) non-OOM `RuntimeError` re-raises.
+- [ ] **Step 9 — implement `LocalStageDispatcher` batch method:** read each input
+      (path→bytes or accept bytes), build/fetch the sized cached predictor, delegate to
+      `run_doctr_batch`, return a list of page dicts. Keep single-image `run_stage` as a
+      thin wrapper over the batch path (`[one]`).
+- [ ] **Step 10 — deferred remote stubs.** `ModalStageDispatcher` /
+      `SharedContainerStageDispatcher` batch methods `raise NotImplementedError("Wave 5:
+      remote batch — see docs/plans/2026-05-28-batched-ocr-dispatch.md")`. Add a test
+      asserting they raise (documents the deferral; keeps them Protocol-conformant).
+- [ ] **Step 11 — verify:** `make typecheck`; `make test AI=1`.
+- [ ] **Step 12 — commit:** `feat(gpu): shared batch worker + Protocol seam + Local OOM backoff`.
 
 **Integration:** merge to `pdomain-ops` `main` (no push).
 
@@ -301,8 +372,10 @@ Set `model: sonnet` on implementers.
       terminal `failed` state (not an aborted run).
 - [ ] **Step 2 — run, verify fail:** `make test AI=1`.
 - [ ] **Step 3 — implement** the chunked loop in `run_project`: split `images` into
-      `chunk_size` groups (`batch_pages` override or default 8); one `run_batch_stage` call
-      per chunk inside `try/except` that marks only that chunk's pages failed and continues;
+      `chunk_size` groups (`batch_pages` override or default 8); one batch call **on the
+      `StageDispatcher` Protocol** (`dispatcher.run_batch(...)`, not a concrete
+      `LocalStageDispatcher` method — so a future remote backend swaps in transparently) per
+      chunk inside `try/except` that marks only that chunk's pages failed and continues;
       per-chunk status callback ("Processed X/N pages"); keep status mutations serialized
       (no concurrency). Delete `resolve_concurrency` + the `asyncio.Semaphore` pool.
 - [ ] **Step 4 — run, verify pass.**
@@ -326,13 +399,34 @@ Independent once Task 3 exists; parallel, different repos. Not required for the 
 
 ### Task 5: pdomain-ocr-cli adopts the batch stage
 **Repo:** `pdomain-ocr-cli` · **Worktree:** `.claude/worktrees/batch-adopt` · **Model:** sonnet
-- [ ] Route whole-book OCR through `run_batch_stage`; chunk by `batch_pages`; same OOM
-      resilience. TDD against a stub dispatcher. `make ci AI=1`. Commit.
+- [ ] Route whole-book OCR through the `StageDispatcher` batch method; chunk by
+      `batch_pages`; same OOM resilience. TDD against a stub dispatcher. `make ci AI=1`. Commit.
 
 ### Task 6: labeler-spa / trainer-spa re-OCR via batch stage
 **Repos:** `pdomain-ocr-labeler-spa`, `pdomain-ocr-trainer-spa` (separate worktrees) · **Model:** sonnet
 - [ ] On-demand re-OCR routes through the batch stage (chunk size 1 is fine — they gain OOM
       resilience for free). TDD per repo. Commit.
+
+---
+
+## Wave 5 — remote backends (DEFERRED, future release)
+
+**Not implemented in this plan.** The seam (Task 3) makes these drop-in: each remote
+dispatcher implements the same `StageDispatcher` batch method and calls the shared
+`run_doctr_batch` worker GPU-side. Captured here so the deferred stubs have a destination.
+
+### Task 7 (deferred): Modal / server batch backends
+**Repo:** `pdomain-ops` · **Model:** sonnet
+- [ ] Wire `modal_app.run_batch` to import and call `run_doctr_batch` (the shared worker),
+      with model warm-load via `@modal.enter()` instead of the module cache.
+- [ ] Implement `ModalStageDispatcher` / `SharedContainerStageDispatcher` batch methods
+      (replace the Wave-3 `NotImplementedError` stubs): serialize image **bytes** into the
+      batch request DTO, invoke the remote function, deserialize page dicts.
+- [ ] Image-bytes transport + size limits; pick GPU profile (`GPU_PROFILE`) and let
+      `pick_doctr_batch_sizes` key off it (or probe inside the container).
+- [ ] Deploy config + an integration smoke test behind a `modal`-marked test group.
+- [ ] Consumers need **zero change** — they already call the Protocol batch method; backend
+      selection is via adapter/config (`PD_GPU_BACKEND`).
 
 ---
 
