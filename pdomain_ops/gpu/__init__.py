@@ -1,7 +1,7 @@
 """GPU adapter package: protocols, device detection, local implementations."""
 
 from pdomain_ops.gpu.default_stages import register_default_stages
-from pdomain_ops.gpu.device import pick_device
+from pdomain_ops.gpu.device import pick_concurrency, pick_device
 from pdomain_ops.gpu.local_stage import LocalStageDispatcher
 from pdomain_ops.gpu.modal_dispatcher import ModalBackend, ModalStageDispatcher
 from pdomain_ops.gpu.protocols import LongJobRunner, StageDispatcher
@@ -38,6 +38,7 @@ __all__ = [
     "SharedContainerBackend",
     "SharedContainerStageDispatcher",
     "StageDispatcher",
+    "pick_concurrency",
     "pick_device",
     "register_default_stages",
 ]

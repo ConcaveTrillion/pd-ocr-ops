@@ -81,3 +81,51 @@ def pick_device() -> Literal["local", "mps", "cpu"]:
     if _mps_available():
         return "mps"
     return "cpu"
+
+
+def _physical_cores() -> int:
+    """Physical CPU core count (falls back to 1). Prefers physical over
+    logical so torch's intra-op threads don't oversubscribe hyperthreads."""
+    try:
+        import psutil  # pyright: ignore[reportMissingImports]  # optional dep
+
+        cores = psutil.cpu_count(logical=False)
+        if cores:
+            return int(cores)
+    except Exception:  # noqa: BLE001 - best-effort; fall through to os
+        pass
+    return os.cpu_count() or 1
+
+
+def _cuda_free_bytes() -> int | None:
+    """Free VRAM in bytes on the active CUDA device, or None if unavailable."""
+    try:
+        import torch  # pyright: ignore[reportMissingImports]  # optional GPU dep
+
+        if not torch.cuda.is_available():
+            return None
+        free, _total = torch.cuda.mem_get_info()
+        return int(free)
+    except Exception:  # noqa: BLE001 - best-effort detection
+        return None
+
+
+# Heuristic VRAM budget for one DocTR predictor's working set (detection +
+# recognition + activations). Conservative; tune against real OOM behaviour.
+_VRAM_PER_WORKER_BYTES = 2_500_000_000
+
+
+def pick_concurrency(device: str | None = None) -> int:
+    """Recommend how many OCR pages to process in parallel for *device*.
+
+    - CPU: physical_cores // 4 (>=1). torch is already internally
+      multi-threaded, so a small worker count avoids core oversubscription
+      and the sustained-load thermal spikes seen on hybrid CPUs.
+    - GPU: a single shared predictor serialises on one CUDA context, so
+      page-level concurrency is 1. (Throughput comes from batching, not
+      concurrent calls.) Returned for completeness / future batch sizing.
+    """
+    device = device or pick_device()
+    if device == "cpu":
+        return max(1, _physical_cores() // 4)
+    return 1
