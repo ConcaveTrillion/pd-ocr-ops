@@ -18,6 +18,7 @@ from pdomain_ops.gpu.types import (
     BatchJobResult,
     BatchProgressCb,
     GPUBackend,
+    OcrBatchRequest,
     OcrPageRequest,
     OcrPageResponse,
     ProcessPageRequest,
@@ -104,6 +105,15 @@ class ModalStageDispatcher(GPUBackend):
                 except Exception:
                     log.exception("modal run_batch progress_cb raised; continuing")
         return results
+
+    async def run_ocr_batch(self, req: OcrBatchRequest) -> list[dict[str, object]]:
+        """Batched OCR via Modal — deferred to Wave 5.
+
+        See pdomain-ops/docs/plans/2026-05-28-batched-ocr-dispatch.md
+        """
+        raise NotImplementedError(
+            "Wave 5: remote batch — see pdomain-ops/docs/plans/2026-05-28-batched-ocr-dispatch.md"
+        )
 
 
 # Legacy alias — pgdp-prep's pre-migration name.

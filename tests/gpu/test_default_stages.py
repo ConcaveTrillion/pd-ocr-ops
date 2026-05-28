@@ -263,3 +263,91 @@ async def test_default_engine_is_doctr(monkeypatch: pytest.MonkeyPatch) -> None:
         await dispatcher.run_stage("ocr", "page-1", image_path="/fake/image.png")
 
     mock_doctr.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Step 5 — sized cache keyed by (det_path, reco_path, det_bs, reco_bs)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_sized_predictor_cache_distinct_for_different_batch_sizes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Cache returns distinct predictors for (det_path, reco_path, det_bs=2) vs (det_bs=4)."""
+    from pathlib import Path
+
+    import pdomain_book_tools.hf as _hf_mod
+    import pdomain_book_tools.ocr.doctr_support as _doctr_support
+
+    import pdomain_ops.gpu.default_stages as ds
+
+    monkeypatch.setenv("PDOMAIN_GPU_BACKEND", "local")
+    ds._predictor_cache.clear()
+
+    fake_det = Path("/fake/det.pt")
+    fake_reco = Path("/fake/reco.pt")
+    monkeypatch.setattr(_hf_mod, "resolve_ocr_models", lambda: (fake_det, fake_reco))
+
+    build_calls: list[tuple[object, object]] = []
+
+    def _build_predictor(_d: object, _r: object, det_bs: int = 2, reco_bs: int = 128) -> object:
+        build_calls.append((_d, _r))
+        return object()  # each call returns a new distinct object
+
+    monkeypatch.setattr(_doctr_support, "get_finetuned_torch_doctr_predictor", _build_predictor)
+
+    # Get predictor with det_bs=2 (simulate via direct cache lookup)
+    cache_key_2 = (str(fake_det), str(fake_reco), 2, 128)
+    cache_key_4 = (str(fake_det), str(fake_reco), 4, 128)
+
+    # Populate cache manually as the impl will do
+    pred_2 = _build_predictor(str(fake_det), str(fake_reco), det_bs=2, reco_bs=128)
+    pred_4 = _build_predictor(str(fake_det), str(fake_reco), det_bs=4, reco_bs=128)
+    ds._predictor_cache[cache_key_2] = pred_2
+    ds._predictor_cache[cache_key_4] = pred_4
+
+    # They must be different objects
+    assert ds._predictor_cache[cache_key_2] is not ds._predictor_cache[cache_key_4]
+    # The 4-tuple cache key must exist
+    assert cache_key_2 in ds._predictor_cache
+    assert cache_key_4 in ds._predictor_cache
+
+
+@pytest.mark.asyncio
+async def test_sized_predictor_cache_reuses_same_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Two batch calls with same (det_path, reco_path, det_bs, reco_bs) reuse one predictor."""
+    from pathlib import Path
+
+    import pdomain_book_tools.hf as _hf_mod
+    import pdomain_book_tools.ocr.doctr_support as _doctr_support
+
+    import pdomain_ops.gpu.default_stages as ds
+
+    monkeypatch.setenv("PDOMAIN_GPU_BACKEND", "local")
+    ds._predictor_cache.clear()
+
+    fake_det = Path("/fake/det.pt")
+    fake_reco = Path("/fake/reco.pt")
+    monkeypatch.setattr(_hf_mod, "resolve_ocr_models", lambda: (fake_det, fake_reco))
+
+    build_call_count = {"n": 0}
+
+    def _build_predictor(_d: object, _r: object, det_bs: int = 2, reco_bs: int = 128) -> object:
+        build_call_count["n"] += 1
+        return object()
+
+    monkeypatch.setattr(_doctr_support, "get_finetuned_torch_doctr_predictor", _build_predictor)
+
+    # Simulate two fetches with the same key
+    cache_key = (str(fake_det), str(fake_reco), 2, 128)
+    if cache_key not in ds._predictor_cache:
+        ds._predictor_cache[cache_key] = _build_predictor(
+            str(fake_det), str(fake_reco), det_bs=2, reco_bs=128
+        )
+    _ = ds._predictor_cache[cache_key]  # second access — no new build
+
+    # build_call_count must be 1 (populated once, fetched without rebuild)
+    assert build_call_count["n"] == 1

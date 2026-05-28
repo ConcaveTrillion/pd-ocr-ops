@@ -43,12 +43,15 @@ if TYPE_CHECKING:
 
 _log = logging.getLogger(__name__)
 
-# Predictor cache keyed by ``(str(det_path), str(reco_path))``.  Building the
-# finetuned DocTR predictor (load .pt files + ``.to(device)``) costs hundreds
-# of ms per call; the underlying HF files are cached by huggingface_hub but
-# the in-memory torch module is not.  Cache lives at module scope so every
-# call in the same process reuses one predictor per (det, reco) pair.
-_predictor_cache: dict[tuple[str, str], Any] = {}
+# Predictor cache keyed by ``(str(det_path), str(reco_path), det_bs, reco_bs)``.
+# Building the finetuned DocTR predictor (load .pt files + ``.to(device)``)
+# costs hundreds of ms per call; the underlying HF files are cached by
+# huggingface_hub but the in-memory torch module is not.  Cache lives at
+# module scope so every call in the same process reuses one predictor per
+# (det, reco, det_bs, reco_bs) tuple.  The batch-size dimensions are part of
+# the key because DocTR bakes det_bs / reco_bs into the predictor at build
+# time; a predictor built for det_bs=4 must not be reused for det_bs=2.
+_predictor_cache: dict[tuple[str, str, int, int], Any] = {}
 
 
 def register_default_stages(dispatcher: LocalStageDispatcher) -> None:
@@ -173,12 +176,18 @@ async def _ocr_local_impl(page_id: str, device: str, **kwargs: Any) -> dict[str,
         )
         return await _ocr_cpu_impl(page_id, device, **kwargs)
 
+    from pdomain_ops.gpu.device import pick_doctr_batch_sizes
+
+    det_bs, reco_bs = pick_doctr_batch_sizes(device, chunk_pages=1)
+
     loop = asyncio.get_event_loop()
     fn = _make_doctr_finetuned_sync(
         image_path=image_path,
         page_id=page_id,
         det_path=str(det_path),
         reco_path=str(reco_path),
+        det_bs=det_bs,
+        reco_bs=reco_bs,
     )
     return await loop.run_in_executor(None, fn)
 
@@ -189,8 +198,14 @@ def _make_doctr_finetuned_sync(
     page_id: str,
     det_path: str,
     reco_path: str,
+    det_bs: int = 2,
+    reco_bs: int = 128,
 ) -> Any:
-    """Return a zero-arg callable that runs finetuned DocTR OCR synchronously."""
+    """Return a zero-arg callable that runs finetuned DocTR OCR synchronously.
+
+    The predictor is cached by ``(det_path, reco_path, det_bs, reco_bs)`` so
+    predictors built for different batch sizes are not shared.
+    """
 
     def _run() -> dict[str, Any]:
         from pdomain_book_tools.ocr.doctr_support import (
@@ -198,7 +213,8 @@ def _make_doctr_finetuned_sync(
         )
         from pdomain_book_tools.ocr.document import Document
 
-        cache_key = (det_path, reco_path)
+        # 4-tuple key: batch-size dims are baked into the predictor at build time.
+        cache_key = (det_path, reco_path, det_bs, reco_bs)
         predictor = _predictor_cache.get(cache_key)
         if predictor is None:
             predictor = get_finetuned_torch_doctr_predictor(det_path, reco_path)

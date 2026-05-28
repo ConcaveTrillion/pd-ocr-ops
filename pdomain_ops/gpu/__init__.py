@@ -2,6 +2,7 @@
 
 from pdomain_ops.gpu.default_stages import register_default_stages
 from pdomain_ops.gpu.device import pick_concurrency, pick_device, pick_doctr_batch_sizes
+from pdomain_ops.gpu.doctr_batch import run_doctr_batch
 from pdomain_ops.gpu.local_stage import LocalStageDispatcher
 from pdomain_ops.gpu.modal_dispatcher import ModalBackend, ModalStageDispatcher
 from pdomain_ops.gpu.protocols import LongJobRunner, StageDispatcher
@@ -15,6 +16,7 @@ from pdomain_ops.gpu.types import (
     BatchProgressCb,
     DispatchModel,
     GPUBackend,
+    OcrBatchRequest,
     OcrPageRequest,
     OcrPageResponse,
     ProcessPageRequest,
@@ -31,6 +33,7 @@ __all__ = [
     "LongJobRunner",
     "ModalBackend",
     "ModalStageDispatcher",
+    "OcrBatchRequest",
     "OcrPageRequest",
     "OcrPageResponse",
     "ProcessPageRequest",
@@ -42,4 +45,5 @@ __all__ = [
     "pick_device",
     "pick_doctr_batch_sizes",
     "register_default_stages",
+    "run_doctr_batch",
 ]

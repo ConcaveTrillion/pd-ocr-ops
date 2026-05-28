@@ -9,7 +9,7 @@ from typing_extensions import Protocol
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
-    from pdomain_ops.gpu.types import JobEvent, JobStatus, StageResult
+    from pdomain_ops.gpu.types import JobEvent, JobStatus, OcrBatchRequest, StageResult
 
 
 @runtime_checkable
@@ -17,10 +17,27 @@ class StageDispatcher(Protocol):
     """Short, sync-ish GPU stage calls (OCR, layout, char-bbox).
 
     Mirrors pgdp-prep's existing STAGE_IMPL registry shape.
+
+    Methods:
+    -------
+    run_stage:
+        Generic single-stage dispatch; returns a StageResult envelope.
+    run_ocr_batch:
+        Batched OCR dispatch — accepts bytes images, returns a list of
+        page dicts (one per input image). This is the Wave-2 seam; remote
+        implementations are deferred to Wave 5.
     """
 
     async def run_stage(self, stage_id: str, page_id: str, **kwargs: object) -> StageResult:
         """Dispatch a short GPU stage call and return the result."""
+        ...
+
+    async def run_ocr_batch(self, req: OcrBatchRequest) -> list[dict[str, object]]:
+        """Run batched OCR on multiple pages.
+
+        Accepts image bytes (not paths) so the same call works remotely
+        in Wave 5. Returns one page dict per input image, in order.
+        """
         ...
 
 

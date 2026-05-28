@@ -14,6 +14,7 @@ from pdomain_ops.gpu.types import (
     BatchJobResult,
     BatchProgressCb,
     GPUBackend,
+    OcrBatchRequest,
     OcrPageRequest,
     OcrPageResponse,
     ProcessPageRequest,
@@ -53,6 +54,15 @@ class SharedContainerStageDispatcher(GPUBackend):
     ) -> list[BatchJobResult]:
         """Run a batch of jobs — not yet wired."""
         raise NotImplementedError("shared_container.run_batch not yet wired")
+
+    async def run_ocr_batch(self, req: OcrBatchRequest) -> list[dict[str, object]]:
+        """Batched OCR via shared container — deferred to Wave 5.
+
+        See pdomain-ops/docs/plans/2026-05-28-batched-ocr-dispatch.md
+        """
+        raise NotImplementedError(
+            "Wave 5: remote batch — see pdomain-ops/docs/plans/2026-05-28-batched-ocr-dispatch.md"
+        )
 
 
 # Legacy alias — pgdp-prep's pre-migration name.

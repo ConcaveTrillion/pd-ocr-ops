@@ -116,6 +116,21 @@ class OcrPageRequest(DispatchModel):
     batch_mode: bool = False
 
 
+class OcrBatchRequest(DispatchModel):
+    """Request to run batched OCR on multiple pages.
+
+    Data (not paths) at the dispatcher boundary so the same call works
+    remotely in Wave 5. Each bytes element is the raw image file content
+    (PNG/JPEG); the worker decodes to ndarray internally.
+    """
+
+    images: list[bytes]
+    source_identifiers: list[str]
+    engine: Literal["doctr", "tesseract"] = "doctr"
+    language: str = "eng"
+    model_key: str | None = None
+
+
 class OcrPageResponse(DispatchModel):
     """Response from a run_ocr call."""
 

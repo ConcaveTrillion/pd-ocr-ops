@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import asyncio
 import time
 import warnings
 from typing import TYPE_CHECKING, Any
 
-from pdomain_ops.gpu.device import pick_device
-from pdomain_ops.gpu.types import StageResult
+from pdomain_ops.gpu.device import pick_device, pick_doctr_batch_sizes
+from pdomain_ops.gpu.types import OcrBatchRequest, StageResult
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -91,4 +92,57 @@ class LocalStageDispatcher:
             device=device,  # pyright: ignore[reportArgumentType]  # narrowed by _VALID_DEVICES + fallback logic above
             duration_ms=duration_ms,
             metadata=result_dict or {},
+        )
+
+    async def run_ocr_batch(self, req: OcrBatchRequest) -> list[dict[str, object]]:
+        """Run batched OCR on multiple pages.
+
+        Accepts image bytes (not paths) so the same interface works remotely
+        in Wave 5.  Delegates to :func:`~pdomain_ops.gpu.doctr_batch.run_doctr_batch`
+        with a sized predictor fetched from / stored in the module-level
+        predictor cache in :mod:`pdomain_ops.gpu.default_stages`.
+
+        The ``build_smaller`` callback closes over the cache so that OOM
+        backoff can rebuild a predictor at reduced batch sizes and store it
+        back under its own cache key.
+        """
+        from pdomain_ops.gpu.default_stages import _predictor_cache
+        from pdomain_ops.gpu.doctr_batch import run_doctr_batch
+
+        device = pick_device()
+        det_bs, reco_bs = pick_doctr_batch_sizes(device, len(req.images))
+
+        def _get_or_build_predictor(d_bs: int, r_bs: int) -> Any:
+            """Fetch from cache or build a predictor for the given batch sizes."""
+            try:
+                from pdomain_book_tools.hf import resolve_ocr_models
+                from pdomain_book_tools.ocr.doctr_support import (
+                    get_finetuned_torch_doctr_predictor,
+                )
+            except ImportError:
+                return None  # No finetuned models available; run_doctr_batch will use CPU
+
+            det_path, reco_path = resolve_ocr_models()
+            cache_key = (str(det_path), str(reco_path), d_bs, r_bs)
+            predictor = _predictor_cache.get(cache_key)
+            if predictor is None:
+                predictor = get_finetuned_torch_doctr_predictor(str(det_path), str(reco_path))
+                _predictor_cache[cache_key] = predictor
+            return predictor
+
+        predictor = _get_or_build_predictor(det_bs, reco_bs)
+
+        def build_smaller(d_bs: int, r_bs: int) -> Any:
+            return _get_or_build_predictor(d_bs, r_bs)
+
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None,
+            lambda: run_doctr_batch(
+                req.images,
+                predictor=predictor,
+                device=device,
+                build_smaller=build_smaller,
+                source_identifiers=req.source_identifiers,
+            ),
         )
