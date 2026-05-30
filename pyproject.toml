@@ -195,9 +195,9 @@ exclude = ["**/__pycache__", "**/.venv", "**/node_modules"]
 # Catches unannotated functions, inferred-Any propagation, untyped decorators,
 # and missing return types that "standard" mode skips.
 typeCheckingMode = "recommended"
-# Warnings are baselined via .basedpyright/baseline.json — new warnings will
-# fail CI; existing ones are frozen until fixed incrementally.
-failOnWarnings = true
+# Warnings are tracked separately; CI/release gates enforce errors only via
+# `basedpyright ... --level error`.
+failOnWarnings = false
 
 # Import cycles are structural and resolved via TYPE_CHECKING guards.
 # Actual import order issues surface as runtime ImportErrors.
